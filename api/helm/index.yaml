@@ -5,7 +5,7 @@ entries:
       artifacthub.io/containsSecurityUpdates: "true"
     apiVersion: v2
     appVersion: V1.0
-    created: "2021-11-10T16:08:33.845874+01:00"
+    created: "2021-11-10T16:15:11.9029537+01:00"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -44,7 +44,7 @@ entries:
       artifacthub.io/containsSecurityUpdates: "true"
     apiVersion: v2
     appVersion: V1.0
-    created: "2021-11-10T16:08:33.8200584+01:00"
+    created: "2021-11-10T16:15:11.8822806+01:00"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -81,7 +81,7 @@ entries:
     version: 1.0.0
   - apiVersion: v1
     appVersion: V1.0
-    created: "2021-11-10T16:08:33.7953951+01:00"
+    created: "2021-11-10T16:15:11.8616617+01:00"
     description: De Adresservice biedt een koppelvlak met de BAG API (V1), waardoor
       het mogelijk is om aan de hand van postcode en huisnummer combinaties adressen
       (en bijbehorende bag ID’s) te suggereren. Het vormt hiermee de kernfunctionaliteit
@@ -112,7 +112,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 11.13.0
-    created: "2021-11-10T16:08:33.8762986+01:00"
+    created: "2021-11-10T16:15:11.932432+01:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -146,7 +146,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 6.2.5
-    created: "2021-11-10T16:08:33.8880744+01:00"
+    created: "2021-11-10T16:15:11.945982+01:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -180,7 +180,7 @@ entries:
       artifacthub.io/containsSecurityUpdates: "true"
     apiVersion: v2
     appVersion: V0.9
-    created: "2021-11-10T16:08:33.8638499+01:00"
+    created: "2021-11-10T16:15:11.9201435+01:00"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -192,7 +192,7 @@ entries:
       version: 15.3.2
     description: De taalhuizen-logic service biedt de mogelijkheid logica aan te bieden
       aan de hand van notificaties vanuit de commonground gateway.
-    digest: dc5dbeecc4d436dbbbc91723f8a587a27b7bb552518f0fb96b2a5b4b0eede587
+    digest: adeae3d0b8197de257d52c192d22d5e824d23677b104450daf6eb1f8ebb88131
     home: https://www.conduction.nl
     icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
     keywords:
@@ -212,4 +212,4 @@ entries:
     urls:
     - taalhuizen-logic-1.0.0.tgz
     version: 1.0.0
-generated: "2021-11-10T16:08:33.7764156+01:00"
+generated: "2021-11-10T16:15:11.8508327+01:00"
