@@ -93,6 +93,7 @@ services:
       - "80:80"
     environment:
       - NGINX_HOST=php
+      - NGINX_ENV=${APP_ENV}
 
         # nlx-outway:
         #   image: ${CONTAINER_REGISTRY_BASE}/${CONTAINER_PROJECT_NAME}-nlx-outway:${APP_ENV}
