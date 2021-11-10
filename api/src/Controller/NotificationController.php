@@ -28,6 +28,6 @@ class NotificationController extends AbstractController
         $mailService = new MailService($commonGroundService, $twig);
         $mailService->sendWelcomeMail($user, 'Welkom bij TOP', $parameterBag->get('frontendLocation'));
 
-        return new Response(json_encode(['username' =>$data['username']]), 200, ['Content-type' => 'application/json']);
+        return new Response(json_encode(['user' =>$data['resource']]), 200, ['Content-type' => 'application/json']);
     }
 }
