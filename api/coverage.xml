@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1637923414">
-  <project timestamp="1637923414">
+<coverage generated="1637922388">
+  <project timestamp="1637922388">
     <file name="/srv/api/src/Controller/NotificationController.php">
       <class name="App\Controller\NotificationController" namespace="global">
         <metrics complexity="7" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="20" coveredstatements="0" elements="22" coveredelements="0"/>
