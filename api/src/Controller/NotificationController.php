@@ -38,14 +38,14 @@ class NotificationController extends AbstractController
     public function createOrganizationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        $organization = $commonGroundService->getResource($data['resource'], [], false);
         $userGroupService = new UserGroupService($commonGroundService);
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
             // Create new userGroups in UC for this organization depending on organization type
+            $organization = $commonGroundService->getResource($data['resource'], [], false);
             $userGroups = $userGroupService->saveUserGroups($organization);
         } elseif ($data['action'] === 'Delete') {
-            // Delete existing userGroups of this organization depending on organization type
-            $userGroups = $userGroupService->deleteUserGroups($organization);
+            // Delete existing userGroups of this organization
+            $userGroups = $userGroupService->deleteUserGroups($data['resource']);
         }
 
         $result = ['organization' => $data['resource']];
