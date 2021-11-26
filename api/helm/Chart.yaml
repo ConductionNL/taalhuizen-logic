@@ -1,31 +1,31 @@
 annotations:
-  artifacthub.io/containsSecurityUpdates: "true"
+    artifacthub.io/containsSecurityUpdates: "true"
 apiVersion: v2
-appVersion: V0.9
-dependencies:
-- condition: postgresql.enabled
-  name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 10.10.3
-- condition: redis.enabled
-  name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 15.3.2
-description: De taalhuizen-logic service biedt de mogelijkheid logica aan te bieden aan de hand van notificaties vanuit de commonground gateway.
+appVersion: V1.0
+description: 'Het Proto Component vormt zowel de gemeenschappelijke basis onder alle componenten, als een “template” voor het maken van nieuwe componenten.'
+name: taalhuizen-logic
+version: 1.0.0
 home: https://www.conduction.nl
 icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
-keywords:
-- commonground
-- haven
-- nlx
-- component
-maintainers:
-- email: ruben@conduction.nl
-  name: Ruben van der Linde
-- email: info@conduction.nl
-  name: Conduction
-name: taalhuizen-logic
 sources:
-- https://commonground.conduction.nl/
-- https://www.commonground.nl/
-version: 1.0.0
+    - https://commonground.conduction.nl/
+    - https://www.commonground.nl/
+keywords:
+    - commonground
+    - haven
+    - nlx
+    - component
+maintainers:
+    - email: ruben@conduction.nl
+      name: Ruben van der Linde
+    - email: info@conduction.nl
+      name: Conduction
+dependencies:
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.1.1
+      condition: postgresql.enabled
+    - name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.7.7
+      condition: redis.enabled
