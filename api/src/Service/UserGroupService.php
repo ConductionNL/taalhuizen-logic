@@ -107,7 +107,7 @@ class UserGroupService
      */
     private function saveLanguageHouseUserGroups(array $languageHouse, array $userGroups): array
     {
-        $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $languageHouse['id']])])['hydra:member'];
+        $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $languageHouse['id']])], false)['hydra:member'];
         $userGroupCoordinator = $this->findUserGroupsByName($existingUserGroups, 'TAALHUIS_COORDINATOR');
         $userGroupEmployee = $this->findUserGroupsByName($existingUserGroups, 'TAALHUIS_EMPLOYEE');
 
@@ -179,7 +179,7 @@ class UserGroupService
      */
     private function saveProviderUserGroups(array $provider, array $userGroups): array
     {
-        $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $provider['id']])])['hydra:member'];
+        $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $provider['id']])], false)['hydra:member'];
 
         $userGroupCoordinator = $this->findUserGroupsByName($existingUserGroups, 'AANBIEDER_COORDINATOR');
         $userGroupMentor = $this->findUserGroupsByName($existingUserGroups, 'AANBIEDER_MENTOR');
