@@ -40,27 +40,21 @@ class UserGroupService
     }
 
     /**
-     * Deletes the user groups for an organization. If organization type is 'taalhuis' or 'aanbieder'.
+     * Deletes the user groups for an organization.
      *
-     * @param array  $organization The organization to delete user groups for
+     * @param string $organization The organization to delete user groups for
      *
      * @return false|mixed False if failed, array of userGroups if successful
      */
-    public function deleteUserGroups(array $organization)
+    public function deleteUserGroups(string $organization)
     {
-        switch ($organization['type']) {
-            case 'taalhuis':
-            case 'aanbieder':
-                $userGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $organization['id']])['hydra:member'];
-                if ($userGroups > 0) {
-                    foreach ($userGroups as $userGroup) {
-                        $this->commonGroundService->deleteResource(null, ['component'=>'uc', 'type' => 'groups', 'id' => $userGroup['id']]);
-                    }
-                }
-                return $userGroups;
-            default:
-                return false;
+        $userGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $organization])['hydra:member'];
+        if ($userGroups > 0) {
+            foreach ($userGroups as $userGroup) {
+                $this->commonGroundService->deleteResource(null, ['component'=>'uc', 'type' => 'groups', 'id' => $userGroup['id']]);
+            }
         }
+        return $userGroups;
     }
 
     /**
