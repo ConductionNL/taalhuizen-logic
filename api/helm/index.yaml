@@ -1,118 +1,11 @@
 apiVersion: v1
 entries:
-  adresservice:
-  - annotations:
-      artifacthub.io/containsSecurityUpdates: "true"
-    apiVersion: v2
-    appVersion: V1.0
-    created: "2021-11-10T16:15:11.9029537+01:00"
-    dependencies:
-    - condition: postgresql.enabled
-      name: postgresql
-      repository: https://charts.bitnami.com/bitnami
-      version: 10.10.3
-    - condition: redis.enabled
-      name: redis
-      repository: https://charts.bitnami.com/bitnami
-      version: 15.3.2
-    description: De Adresservice biedt een koppelvlak met de BAG API (V1), waardoor
-      het mogelijk is om aan de hand van postcode en huisnummer combinaties adressen
-      (en bijbehorende bag ID’s) te suggereren. Het vormt hiermee de kernfunctionaliteit
-      voor formulieren waarin klanten adressen kunnen opgeven aan de hand van huisnummer
-      en postcode combinatie.
-    digest: 13d01ba8227c7587e5664374b07020eaab862fc4dc6c3c21435bf3e1d18649b5
-    home: https://www.conduction.nl
-    icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
-    keywords:
-    - commonground
-    - haven
-    - nlx
-    - component
-    maintainers:
-    - email: ruben@conduction.nl
-      name: Ruben van der Linde
-    - email: info@conduction.nl
-      name: Conduction
-    name: adresservice
-    sources:
-    - https://commonground.conduction.nl/
-    - https://www.commonground.nl/
-    urls:
-    - adresservice-1.1.0.tgz
-    version: 1.1.0
-  - annotations:
-      artifacthub.io/containsSecurityUpdates: "true"
-    apiVersion: v2
-    appVersion: V1.0
-    created: "2021-11-10T16:15:11.8822806+01:00"
-    dependencies:
-    - condition: postgresql.enabled
-      name: postgresql
-      repository: https://charts.bitnami.com/bitnami
-      version: 10.1.1
-    - condition: redis.enabled
-      name: redis
-      repository: https://charts.bitnami.com/bitnami
-      version: 12.7.7
-    description: '&quot;De Adresservice biedt een koppelvlak met de BAG API (V1),
-      waardoor het mogelijk is om aan de hand van postcode en huisnummer combinaties
-      adressen (en bijbehorende bag ID’s) te suggereren. Het vormt hiermee de kernfunctionaliteit
-      voor formulieren waarin klanten adressen kunnen opgeven aan de hand van huisnummer
-      en postcode combinatie.&quot;'
-    digest: 5e3d1c5dd7290fe661382c7b193706b78ef6d46afdc951171dd8760fa2ae4e3f
-    home: https://www.conduction.nl
-    icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
-    keywords:
-    - commonground
-    - haven
-    - nlx
-    - component
-    maintainers:
-    - email: ruben@conduction.nl
-      name: Ruben van der Linde
-    - email: info@conduction.nl
-      name: Conduction
-    name: adresservice
-    sources:
-    - https://commonground.conduction.nl/
-    - https://www.commonground.nl/
-    urls:
-    - adresservice-1.0.0.tgz
-    version: 1.0.0
-  - apiVersion: v1
-    appVersion: V1.0
-    created: "2021-11-10T16:15:11.8616617+01:00"
-    description: De Adresservice biedt een koppelvlak met de BAG API (V1), waardoor
-      het mogelijk is om aan de hand van postcode en huisnummer combinaties adressen
-      (en bijbehorende bag ID’s) te suggereren. Het vormt hiermee de kernfunctionaliteit
-      voor formulieren waarin klanten adressen kunnen opgeven aan de hand van huisnummer
-      en postcode combinatie.
-    digest: 7b647f24fcfed864946d10f7afc3e2b497fc949c1ada79a5ed3c7a223f3525c8
-    home: https://www.conduction.nl
-    icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
-    keywords:
-    - commonground
-    - haven
-    - nlx
-    - component
-    maintainers:
-    - email: ruben@conduction.nl
-      name: Ruben van der Linde
-    - email: info@conduction.nl
-      name: Conduction
-    name: adresservice
-    sources:
-    - https://commonground.conduction.nl/
-    - https://www.commonground.nl/
-    urls:
-    - adresservice-0.1.0.tgz
-    version: 0.1.0
   postgresql:
   - annotations:
       category: Database
     apiVersion: v2
     appVersion: 11.13.0
-    created: "2021-11-10T16:15:11.932432+01:00"
+    created: "2021-11-26T09:25:16.3742044Z"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -146,7 +39,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 6.2.5
-    created: "2021-11-10T16:15:11.945982+01:00"
+    created: "2021-11-26T09:25:16.3872773Z"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -180,7 +73,7 @@ entries:
       artifacthub.io/containsSecurityUpdates: "true"
     apiVersion: v2
     appVersion: V0.9
-    created: "2021-11-10T16:15:11.9201435+01:00"
+    created: "2021-11-26T09:25:16.3621924Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -192,7 +85,7 @@ entries:
       version: 15.3.2
     description: De taalhuizen-logic service biedt de mogelijkheid logica aan te bieden
       aan de hand van notificaties vanuit de commonground gateway.
-    digest: adeae3d0b8197de257d52c192d22d5e824d23677b104450daf6eb1f8ebb88131
+    digest: aab728bc0f1a89bd2c558bdaf21f5d7f4a2a7d54b01e1a169fdcf368e5cb8b49
     home: https://www.conduction.nl
     icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
     keywords:
@@ -212,4 +105,4 @@ entries:
     urls:
     - taalhuizen-logic-1.0.0.tgz
     version: 1.0.0
-generated: "2021-11-10T16:15:11.8508327+01:00"
+generated: "2021-11-26T09:25:16.341747Z"
