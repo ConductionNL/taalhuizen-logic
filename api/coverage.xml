@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1637918909">
-  <project timestamp="1637918909">
+<coverage generated="1637922388">
+  <project timestamp="1637922388">
     <file name="/srv/api/src/Controller/NotificationController.php">
       <class name="App\Controller\NotificationController" namespace="global">
-        <metrics complexity="6" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="15" coveredstatements="0" elements="17" coveredelements="0"/>
+        <metrics complexity="7" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="20" coveredstatements="0" elements="22" coveredelements="0"/>
       </class>
       <line num="22" type="method" name="createUserAction" visibility="public" complexity="2" crap="6" count="0"/>
       <line num="24" type="stmt" count="0"/>
@@ -13,7 +13,7 @@
       <line num="29" type="stmt" count="0"/>
       <line num="30" type="stmt" count="0"/>
       <line num="32" type="stmt" count="0"/>
-      <line num="38" type="method" name="createOrganizationAction" visibility="public" complexity="4" crap="20" count="0"/>
+      <line num="38" type="method" name="createOrganizationAction" visibility="public" complexity="5" crap="30" count="0"/>
       <line num="40" type="stmt" count="0"/>
       <line num="41" type="stmt" count="0"/>
       <line num="42" type="stmt" count="0"/>
@@ -22,7 +22,12 @@
       <line num="46" type="stmt" count="0"/>
       <line num="48" type="stmt" count="0"/>
       <line num="51" type="stmt" count="0"/>
-      <metrics loc="53" ncloc="47" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="15" coveredstatements="0" elements="17" coveredelements="0"/>
+      <line num="52" type="stmt" count="0"/>
+      <line num="53" type="stmt" count="0"/>
+      <line num="54" type="stmt" count="0"/>
+      <line num="56" type="stmt" count="0"/>
+      <line num="57" type="stmt" count="0"/>
+      <metrics loc="59" ncloc="53" classes="1" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="20" coveredstatements="0" elements="22" coveredelements="0"/>
     </file>
     <file name="/srv/api/src/Controller/UserController.php">
       <class name="App\Controller\UserController" namespace="global">
@@ -218,6 +223,6 @@
       <line num="250" type="stmt" count="0"/>
       <metrics loc="252" ncloc="169" classes="1" methods="11" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="74" coveredstatements="0" elements="85" coveredelements="0"/>
     </file>
-    <metrics files="7" loc="516" ncloc="410" classes="7" methods="26" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="149" coveredstatements="0" elements="175" coveredelements="0"/>
+    <metrics files="7" loc="522" ncloc="416" classes="7" methods="26" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="154" coveredstatements="0" elements="180" coveredelements="0"/>
   </project>
 </coverage>
