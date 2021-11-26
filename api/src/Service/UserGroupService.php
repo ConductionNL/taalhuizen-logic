@@ -27,7 +27,7 @@ class UserGroupService
         $userGroups = [];
         switch ($organization['type']) {
             case 'taalhuis':
-                $userGroups = $this->saveTaalhuisUserGroups($organization, $userGroups);
+                $userGroups = $this->saveLanguageHouseUserGroups($organization, $userGroups);
                 break;
             case 'aanbieder':
                 $userGroups = $this->saveProviderUserGroups($organization, $userGroups);
@@ -83,6 +83,21 @@ class UserGroupService
     }
 
     /**
+     * Gets the scopes of a specific userGroup
+     *
+     * @param string $userGroupId
+     * @return array
+     */
+    private function getScopes(string $userGroupId): array
+    {
+        $scopes = $this->commonGroundService->getResource(['component' => 'uc', 'type' => 'groups', 'id' => $userGroupId])['scopes'];
+        foreach ($scopes as &$scope) {
+            $scope = '/scopes/'.$scope['id'];
+        }
+        return $scopes;
+    }
+
+    /**
      * Saves the user groups for a language house.
      *
      * @param array $languageHouse The language house the groups have to be saved for
@@ -90,14 +105,14 @@ class UserGroupService
      *
      * @return array The user groups that exist for the language house
      */
-    private function saveTaalhuisUserGroups(array $languageHouse, array $userGroups): array
+    private function saveLanguageHouseUserGroups(array $languageHouse, array $userGroups): array
     {
         $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $languageHouse['id']])])['hydra:member'];
         $userGroupCoordinator = $this->findUserGroupsByName($existingUserGroups, 'TAALHUIS_COORDINATOR');
         $userGroupEmployee = $this->findUserGroupsByName($existingUserGroups, 'TAALHUIS_EMPLOYEE');
 
-        $userGroups = $this->saveTaalhuisCoordinatorGroup($languageHouse, $userGroups, $userGroupCoordinator);
-        $userGroups = $this->saveTaalhuisEmployeeGroup($languageHouse, $userGroups, $userGroupEmployee);
+        $userGroups = $this->saveLanguageHouseCoordinatorGroup($languageHouse, $userGroups, $userGroupCoordinator);
+        $userGroups = $this->saveLanguageHouseEmployeeGroup($languageHouse, $userGroups, $userGroupEmployee);
 
         return $userGroups;
     }
@@ -111,12 +126,13 @@ class UserGroupService
      *
      * @return array The user groups that exist for the language house
      */
-    private function saveTaalhuisCoordinatorGroup(array $languageHouse, array $userGroups, array $userGroupCoordinator): array
+    private function saveLanguageHouseCoordinatorGroup(array $languageHouse, array $userGroups, array $userGroupCoordinator): array
     {
         $coordinator = [
             'organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $languageHouse['id']]),
             'name'         => 'TAALHUIS_COORDINATOR',
             'description'  => 'UserGroup coordinator of '.$languageHouse['name'],
+            'scopes'       => $this->getScopes('6c01ae98-5c9c-49e3-b99f-d74ad96074ab'),
         ];
         if ($userGroupCoordinator) {
             $userGroups[] = $this->commonGroundService->updateResource($coordinator, ['component' => 'uc', 'type' => 'groups', 'id' => $userGroupCoordinator['id']]);
@@ -136,12 +152,13 @@ class UserGroupService
      *
      * @return array The user groups that exist for the language house
      */
-    private function saveTaalhuisEmployeeGroup(array $languageHouse, array $userGroups, array $userGroupEmployee): array
+    private function saveLanguageHouseEmployeeGroup(array $languageHouse, array $userGroups, array $userGroupEmployee): array
     {
         $employee = [
             'organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $languageHouse['id']]),
             'name'         => 'TAALHUIS_EMPLOYEE',
             'description'  => 'UserGroup employee of '.$languageHouse['name'],
+            'scopes'       => $this->getScopes('f88efb3f-5a88-475d-b7b0-8865028487e2'),
         ];
         if ($userGroupEmployee) {
             $userGroups[] = $this->commonGroundService->updateResource($employee, ['component' => 'uc', 'type' => 'groups', 'id' => $userGroupEmployee['id']]);
@@ -190,6 +207,7 @@ class UserGroupService
             'organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $provider['id']]),
             'name'         => 'AANBIEDER_COORDINATOR',
             'description'  => 'UserGroup coordinator of '.$provider['name'],
+            'scopes'       => $this->getScopes('7ac8ff69-ed2f-42d6-9838-c1cdba19455d'),
         ];
         if ($userGroupCoordinator) {
             $userGroups[] = $this->commonGroundService->updateResource($coordinator, ['component' => 'uc', 'type' => 'groups', 'id' => $userGroupCoordinator['id']]);
@@ -215,6 +233,7 @@ class UserGroupService
             'organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $provider['id']]),
             'name'         => 'AANBIEDER_MENTOR',
             'description'  => 'UserGroup mentor of '.$provider['name'],
+            'scopes'       => $this->getScopes('6e6bf779-2505-4dff-be47-94a45d65f64e'),
         ];
         if ($userGroupMentor) {
             $userGroups[] = $this->commonGroundService->updateResource($mentor, ['component' => 'uc', 'type' => 'groups', 'id' => $userGroupMentor['id']]);
@@ -240,6 +259,7 @@ class UserGroupService
             'organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $provider['id']]),
             'name'         => 'AANBIEDER_VOLUNTEER',
             'description'  => 'UserGroup volunteer of '.$provider['name'],
+            'scopes'       => $this->getScopes('a4c7de5b-be1b-4dda-9b37-62e5938ffe7b'),
         ];
         if ($userGroupVolunteer) {
             $userGroups[] = $this->commonGroundService->updateResource($volunteer, ['component' => 'uc', 'type' => 'groups', 'id' => $userGroupVolunteer['id']]);
