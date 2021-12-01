@@ -35,7 +35,7 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/organizations", methods={"POST"})
      */
-    public function createOrganizationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
         $userGroupService = new UserGroupService($commonGroundService);
@@ -54,6 +54,51 @@ class NotificationController extends AbstractController
             $result['note'] = 'userGroups contains info of the Deleted userGroups';
         }
         $result['userGroups'] = $userGroups ?? 'Something went wrong';
+        return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
+    }
+
+    /**
+     * @Route ("/employees", methods={"POST"})
+     */
+    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    {
+        $data = json_decode($request->getContent(), true);
+
+//        $component = [];
+//        $commonGroundService->callService($component, );
+
+        // if create or update
+        // get employee, get the person from this employee
+        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
+        // (send mail if needed)
+
+        // if delete
+        // delete the user
+
+        $result = [];
+
+        return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
+    }
+
+    /**
+     * @Route ("/students", methods={"POST"})
+     */
+    public function  createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    {
+        //TODO: see employee above this function
+
+        $data = json_decode($request->getContent(), true);
+
+        // if create or update
+        // get student, get the person from this student
+        // create (or update) user for this student with the person connection
+        // (send mail if needed)
+
+        // if delete
+        // delete the user
+
+        $result = [];
+
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
     }
 }
