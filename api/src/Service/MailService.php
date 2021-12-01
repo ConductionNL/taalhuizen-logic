@@ -27,7 +27,7 @@ class MailService
         $parameters = [
             'fullname' => $person['name'] ?? $user['username'],
             'base64_encoded_email' => base64_encode($user['username']),
-            'base64_encoded_token' => $response['token'],
+            'base64_encoded_token' => base64_encode($response['token']),
             'app_base_url' => rtrim($frontend, '/'),
             'subject'   => $subject,
         ];
@@ -41,7 +41,7 @@ class MailService
                 'content'  => $content,
                 'type'     => 'email',
                 'status'   => 'queued',
-                'service'  => '/services/'.$service['id'],
+                'service'  => '/services/' . $service['id'],
                 'subject'  => $subject,
             ],
             ['component' => 'bs', 'type' => 'messages']
