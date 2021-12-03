@@ -69,6 +69,7 @@ class NotificationController extends AbstractController
 
         // if create or update
         // get employee, get the person from this employee
+        // get organization (type) of this employee, to make sure we only give/allow userGroups of the correct organization type
         // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
         // (send mail if needed)
 
