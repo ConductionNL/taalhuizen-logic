@@ -42,7 +42,7 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/organizations", methods={"POST"})
      */
-    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
         $userGroupService = new UserGroupService($commonGroundService);
@@ -67,25 +67,25 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/employees", methods={"POST"})
      */
-    public function  createOrEditEmployeeAction(Request $request)
+    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
 
-        // retrieve employee object from gateway
-        $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => substr($data['resource'], strrpos($data['resource'], '/') + 1)]);
-
-        var_dump($employee);
-        die;
-
         // if create or update
-        // get employee, get the person from this employee
-        // get organization (type) of this employee, to make sure we only give/allow userGroups of the correct organization type
-        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
-        // (send mail if needed)
+        if ($data['action'] === 'Create' || $data['action'] === 'Update') {
+            $userGroupService = new UserGroupService($commonGroundService);
+            // Retrieve employee object from gateway
+            $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            // Create/update a user for it in the gateway with correct user groups
+            $user = $userGroupService->saveUser($employee, $data['action']);
+        } elseif ($data['action'] === 'Delete') {
+            // Do nothing! This is already handled by the gateway.
+        }
 
-        // if delete
-        // delete the user
-        $result = [];
+        $result = [
+            'employee'  => $data['resource'],
+            'user'      => $user ?? null
+        ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
     }
