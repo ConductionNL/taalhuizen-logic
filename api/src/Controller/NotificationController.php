@@ -16,20 +16,27 @@ use Twig\Environment;
 
 class NotificationController extends AbstractController
 {
+    private CommonGroundService $commonGroundService;
+
+    public function __construct(CommonGroundService $commonGroundService)
+    {
+        $this->commonGroundService = $commonGroundService;
+    }
+
     /**
      * @Route ("/users", methods={"POST"})
      */
     public function createUserAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        if($data['action'] !== 'Create'){
-            return new Response(json_encode(['username' =>$data['resource']]), 200, ['Content-type' => 'application/json']);
+        if ($data['action'] !== 'Create') {
+            return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
         $user = $commonGroundService->getResource($data['resource']);
         $mailService = new MailService($commonGroundService, $twig);
         $mailService->sendWelcomeMail($user, 'Welkom bij TOP', $parameterBag->get('frontendLocation'));
 
-        return new Response(json_encode(['user' =>$data['resource']]), 200, ['Content-type' => 'application/json']);
+        return new Response(json_encode(['user' => $data['resource']]), 200, ['Content-type' => 'application/json']);
     }
 
     /**
@@ -60,12 +67,15 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/employees", methods={"POST"})
      */
-    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function  createOrEditEmployeeAction(Request $request)
     {
         $data = json_decode($request->getContent(), true);
 
-//        $component = [];
-//        $commonGroundService->callService($component, );
+        // retrieve employee object from gateway
+        $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => substr($data['resource'], strrpos($data['resource'], '/') + 1)]);
+
+        var_dump($employee);
+        die;
 
         // if create or update
         // get employee, get the person from this employee
@@ -75,7 +85,6 @@ class NotificationController extends AbstractController
 
         // if delete
         // delete the user
-
         $result = [];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
