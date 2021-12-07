@@ -16,26 +16,33 @@ use Twig\Environment;
 
 class NotificationController extends AbstractController
 {
+    private CommonGroundService $commonGroundService;
+
+    public function __construct(CommonGroundService $commonGroundService)
+    {
+        $this->commonGroundService = $commonGroundService;
+    }
+
     /**
      * @Route ("/users", methods={"POST"})
      */
     public function createUserAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        if($data['action'] !== 'Create'){
-            return new Response(json_encode(['username' =>$data['resource']]), 200, ['Content-type' => 'application/json']);
+        if ($data['action'] !== 'Create') {
+            return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
         $user = $commonGroundService->getResource($data['resource']);
         $mailService = new MailService($commonGroundService, $twig);
         $mailService->sendWelcomeMail($user, 'Welkom bij TOP', $parameterBag->get('frontendLocation'));
 
-        return new Response(json_encode(['user' =>$data['resource']]), 200, ['Content-type' => 'application/json']);
+        return new Response(json_encode(['user' => $data['resource']]), 200, ['Content-type' => 'application/json']);
     }
 
     /**
      * @Route ("/organizations", methods={"POST"})
      */
-    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
         $userGroupService = new UserGroupService($commonGroundService);
@@ -60,22 +67,25 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/employees", methods={"POST"})
      */
-    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
 
-//        $component = [];
-//        $commonGroundService->callService($component, );
-
         // if create or update
-        // get employee, get the person from this employee
-        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
-        // (send mail if needed)
+        if ($data['action'] === 'Create' || $data['action'] === 'Update') {
+            $userGroupService = new UserGroupService($commonGroundService);
+            // Retrieve employee object from gateway
+            $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            // Create/update a user for it in the gateway with correct user groups
+            $user = $userGroupService->saveUser($employee, $data['action']);
+        } elseif ($data['action'] === 'Delete') {
+            // Do nothing! This is already handled by the gateway.
+        }
 
-        // if delete
-        // delete the user
-
-        $result = [];
+        $result = [
+            'employee'  => $data['resource'],
+            'user'      => $user ?? null
+        ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
     }

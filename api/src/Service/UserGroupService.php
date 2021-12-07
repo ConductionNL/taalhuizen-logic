@@ -16,6 +16,100 @@ class UserGroupService
     }
 
     /**
+     * Saves the user for an employee in the gateway and UC
+     *
+     * @param array $employee
+     * @param string $action
+     * @return array
+     */
+    public function saveUser(array $employee, string $action): array
+    {
+        $existingUsers = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'users'], ['person' => $employee['person']['@uri']], false)['hydra:member'];
+        if (count($existingUsers) > 0) {
+            $existingUser = $existingUsers[0];
+        }
+
+        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
+        $user = [
+            "locale" => "nl",
+            "username" => $employee['person']['emails'][0]['email'],
+            "organization" => $employee['organization']['id'],
+            "userGroups" => $this->getUserGroups($employee['organization'], $employee['role']),
+            "person" => $employee['person']['id']
+        ];
+
+        if ($action == 'Create') {
+            if (isset($existingUser)) {
+                return ['Error' => 'There already exists a user for this person: ' . $employee['person']['@uri']];
+            }
+            // Temp password
+            $user['password'] = $this->randomPassword();
+            // (This will send a mail for a new user to change their password)
+            $user = $this->commonGroundService->createResource($user, ['component' => 'gateway', 'type' => 'users']);
+        } elseif ($action == 'Update') {
+            if (!isset($existingUser)) {
+                // TODO: maybe create a new user, even though we are doing an Update and not a Create ?
+                return ['Error' => 'Couldn\'t find a user for this person: ' . $employee['person']['@uri']];
+            }
+            if ($employee['person']['emails'][0]['email'] != $existingUser['username']) {
+                $user['currentPassword'] = '???'; // TODO!!!
+                return ['Error' => 'Changing a username is not implemented yet, we need a password for that'];
+            }
+            $user = $this->commonGroundService->updateResource($user, ['component' => 'gateway', 'type' => 'users', 'id' => $existingUser['id']]); //TODO
+        }
+
+        return $user;
+    }
+
+    /**
+     * Gets the correct userGroup(s) of an organization and a given role
+     *
+     * @param array $organization
+     * @param string $role
+     * @return array
+     */
+    private function getUserGroups(array $organization, string $role): array
+    {
+        // get organization (type) of this employee, to make sure we only give/allow userGroups of the correct organization type
+        $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $organization['@uri']], false)['hydra:member'];
+        $userGroups = [];
+
+        switch ($organization['type']) {
+            case 'taalhuis':
+                $userGroups[] = $this->findUserGroupByName($existingUserGroups, 'TAALHUIS_'.$role)['id'];
+                break;
+            case 'aanbieder':
+                if ($role == 'COORDINATOR_MENTOR') {
+                    $userGroups[] = $this->findUserGroupByName($existingUserGroups, 'AANBIEDER_COORDINATOR')['id'];
+                    $role = 'MENTOR';
+                }
+                $userGroups[] = $this->findUserGroupByName($existingUserGroups, 'AANBIEDER_'.$role)['id'];
+                break;
+            case 'bisc':
+                $userGroups[] = '8e90f9f0-acb7-406d-9550-be614040effd'; // The bisc userGroupId todo: make this a helm value or something?
+                break;
+            case 'verwijzer':
+            default:
+                // TODO: ?
+                break;
+        }
+
+        // TODO: maybe do something if we can't find any userGroups, because the given $role is incorrect in combination with the org type for example
+        return $userGroups;
+    }
+
+    private function randomPassword() {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?></.,\\|\'";:]}[{=+-_)(*&^%$#@!`~';
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 12; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass); //turn the array into a string
+    }
+
+    /**
      * Saves the user groups for an organization. Different groups depending on the organization type.
      *
      * @param array  $organization The organization to save user groups for
@@ -65,7 +159,7 @@ class UserGroupService
      *
      * @return array The existing user group (if it exists)
      */
-    private function findUserGroupsByName(array $userGroups, string $name): ?array
+    private function findUserGroupByName(array $userGroups, string $name): ?array
     {
         foreach ($userGroups as $userGroup) {
             if ($userGroup['name'] == $name) {
@@ -102,8 +196,8 @@ class UserGroupService
     private function saveLanguageHouseUserGroups(array $languageHouse, array $userGroups): array
     {
         $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $languageHouse['id']])], false)['hydra:member'];
-        $userGroupCoordinator = $this->findUserGroupsByName($existingUserGroups, 'TAALHUIS_COORDINATOR');
-        $userGroupEmployee = $this->findUserGroupsByName($existingUserGroups, 'TAALHUIS_EMPLOYEE');
+        $userGroupCoordinator = $this->findUserGroupByName($existingUserGroups, 'TAALHUIS_COORDINATOR');
+        $userGroupEmployee = $this->findUserGroupByName($existingUserGroups, 'TAALHUIS_EMPLOYEE');
 
         $userGroups = $this->saveLanguageHouseCoordinatorGroup($languageHouse, $userGroups, $userGroupCoordinator);
         $userGroups = $this->saveLanguageHouseEmployeeGroup($languageHouse, $userGroups, $userGroupEmployee);
@@ -175,9 +269,9 @@ class UserGroupService
     {
         $existingUserGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $this->commonGroundService->cleanUrl(['component' => 'cc', 'type' => 'organizations', 'id' => $provider['id']])], false)['hydra:member'];
 
-        $userGroupCoordinator = $this->findUserGroupsByName($existingUserGroups, 'AANBIEDER_COORDINATOR');
-        $userGroupMentor = $this->findUserGroupsByName($existingUserGroups, 'AANBIEDER_MENTOR');
-        $userGroupVolunteer = $this->findUserGroupsByName($existingUserGroups, 'AANBIEDER_VOLUNTEER');
+        $userGroupCoordinator = $this->findUserGroupByName($existingUserGroups, 'AANBIEDER_COORDINATOR');
+        $userGroupMentor = $this->findUserGroupByName($existingUserGroups, 'AANBIEDER_MENTOR');
+        $userGroupVolunteer = $this->findUserGroupByName($existingUserGroups, 'AANBIEDER_VOLUNTEER');
 
         $userGroups = $this->saveProviderCoordinatorUserGroup($provider, $userGroups, $userGroupCoordinator);
         $userGroups = $this->saveProviderMentorUserGroup($provider, $userGroups, $userGroupMentor);
