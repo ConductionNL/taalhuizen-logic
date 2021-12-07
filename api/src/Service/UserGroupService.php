@@ -31,6 +31,7 @@ class UserGroupService
 
         // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
         $user = [
+            "locale" => "nl",
             "username" => $employee['person']['emails'][0]['email'],
             "organization" => $employee['organization']['id'],
             "userGroups" => $this->getUserGroups($employee['organization'], $employee['role']),
@@ -41,6 +42,7 @@ class UserGroupService
             if (isset($existingUser)) {
                 return ['Error' => 'There already exists a user for this person: ' . $employee['person']['@uri']];
             }
+            // Temp password
             $user['password'] = $this->randomPassword();
             // (This will send a mail for a new user to change their password)
             $user = $this->commonGroundService->createResource($user, ['component' => 'gateway', 'type' => 'users']);
@@ -48,6 +50,10 @@ class UserGroupService
             if (!isset($existingUser)) {
                 // TODO: maybe create a new user, even though we are doing an Update and not a Create ?
                 return ['Error' => 'Couldn\'t find a user for this person: ' . $employee['person']['@uri']];
+            }
+            if ($employee['person']['emails'][0]['email'] != $existingUser['username']) {
+                $user['currentPassword'] = '???'; // TODO!!!
+                return ['Error' => 'Changing a username is not implemented yet, we need a password for that'];
             }
             $user = $this->commonGroundService->updateResource($user, ['component' => 'gateway', 'type' => 'users', 'id' => $existingUser['id']]); //TODO
         }
