@@ -79,7 +79,7 @@ class NotificationController extends AbstractController
             // Create/update a user for it in the gateway with correct user groups
             $user = $userGroupService->saveUser($employee, $data['action']);
         } elseif ($data['action'] === 'Delete') {
-            // Do nothing! This is already handled by the gateway.
+            // Do nothing! This is already handled by the gateway. including deleting the user from UC
         }
 
         $result = [
