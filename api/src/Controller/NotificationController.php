@@ -125,8 +125,9 @@ class NotificationController extends AbstractController
         }
 
         $result = [
-            'student'  => $data['resource'],
-            'user'      => $user ?? null
+            'studentUri'   => $data['resource'],
+            'user'      => $user ?? null,
+            'studentObject'   => $student ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);

@@ -87,6 +87,7 @@ class UserService
             "locale" => "nl",
             "username" => $student['person']['emails'][0]['email'],
             "organization" => array_key_exists('id', $student['languageHouse']) ? $student['languageHouse']['id'] : null, // TODO: replace null with a default organization?
+            "userGroups" => [],
             "person" => $student['person']['id']
         ];
 
