@@ -43,8 +43,9 @@ class StudentService
         // If this student does have a LanguageHouse & intake status == PENDING (public registration Release 3 Scenario 5.0)
         elseif (array_key_exists('intake', $student) && array_key_exists('status', $student['intake']) && $student['intake']['status'] == 'PENDING') {
             // todo: update ObjectEntity->organzation to LanguageHouse
+//            var_dump('org '.$student['languageHouse']['@uri']);
             $objectEntity = ['organization' => $student['languageHouse']['@uri']];
-            $this->commonGroundService->updateResource($objectEntity, 'https://backend-bisc-dev.commonground.nu/admin/object_entities/'.$student['id']);
+            $this->commonGroundService->updateResource($objectEntity, ['component' => 'gatewayAdmin', 'type' => 'object_entities', 'id' => $student['id']]);
         }
 
         return $student;

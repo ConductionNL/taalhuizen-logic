@@ -93,8 +93,9 @@ class NotificationController extends AbstractController
         }
 
         $result = [
-            'employee'  => $data['resource'],
-            'user'      => $user ?? null
+            'employeeUri'    => $data['resource'],
+            'user'           => $user ?? null,
+            'employeeObject' => $employee ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
@@ -116,7 +117,7 @@ class NotificationController extends AbstractController
             $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
             // Check if we need to find a LanguageHouse with the students address
             $studentService = new StudentService($commonGroundService);
-            $student = $studentService->checkLanguageHouse($student);
+            $student = $studentService->checkLanguageHouse($student); //TODO: test this
             // Create/update a user for it in the gateway
             $userService = new UserService($commonGroundService);
             $user = $userService->saveStudentUser($student, $data['action']);
@@ -138,19 +139,20 @@ class NotificationController extends AbstractController
      */
     public function  createContactMomentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
+        //TODO: test this
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'contact_moments') { //TODO:checken of de topic klopt
+        if ($data['topic'] !== 'contact_moments') { //TODO: check if this topic is correct?
             return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != contact_moments)']), 400, ['Content-type' => 'application/json']);
         }
         if ($data['action'] !== 'Create') {
             return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
 
-        //TODO: met userId de employee ophalen en die koppelen (dit verplaatsen naar een service!)
-
+        //Find employee with the owner/user of this contactMoment and connect it to it TODO: move this code to a new service!?
         // Retrieve contactMoment object from gateway
         $contactMoment = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
         // Get owner to get the employee and connect it to this contactMoment
+        // TODO: search through/in gateway instead of UC and MRC ?
         $user = $this->commonGroundService->getResource(['component' => 'uc', 'type' => 'users', 'id' => $contactMoment['@owner']], [], false);
         $employees = $this->commonGroundService->getResourceList(['component' => 'mrc', 'type' => 'employees'], ['person' => $user['person']], false);
         if (count($employees) > 0) {
@@ -158,14 +160,15 @@ class NotificationController extends AbstractController
             $updateContactMoment = [
                 'employee' => $employee['id']
             ];
-            $user = $this->commonGroundService->updateResource($updateContactMoment, ['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])]);
+            $contactMoment = $this->commonGroundService->updateResource($updateContactMoment, ['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])]);
         }
 
         $result = [
-            'contact_moment'   => $data['resource'],
-            'user'             => $user['@id'] ?? $contactMoment['@owner'],
-            'person'           => $user['person'],
-            'employee'         => isset($employee) ? $employee['@id'] : null
+            'contactMomentUri'      => $data['resource'],
+            'user'                  => $user['@id'] ?? $contactMoment['@owner'],
+            'person'                => $user['person'],
+            'employee'              => isset($employee) ? $employee['@id'] : null,
+            'contactMomentObject'   => $contactMoment ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
