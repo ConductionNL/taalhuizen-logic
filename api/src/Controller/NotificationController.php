@@ -139,7 +139,7 @@ class NotificationController extends AbstractController
      */
     public function  createContactMomentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
-        //TODO: test this
+        //TODO: test all of this
         $data = json_decode($request->getContent(), true);
         if ($data['topic'] !== 'contact_moments') { //TODO: check if this topic is correct?
             return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != contact_moments)']), 400, ['Content-type' => 'application/json']);
