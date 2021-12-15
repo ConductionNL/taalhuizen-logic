@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 use App\Service\MailService;
+use App\Service\EmployeeService;
 use App\Service\StudentService;
 use App\Service\UserService;
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
@@ -85,6 +86,8 @@ class NotificationController extends AbstractController
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
             // Retrieve employee object from gateway
             $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            $employeeService = new EmployeeService($commonGroundService);
+            $employee = $employeeService->checkOrganization($employee);
             // Create/update a user for it in the gateway with correct user groups
             $userService = new UserService($commonGroundService);
             $user = $userService->saveEmployeeUser($employee, $data['action']);
