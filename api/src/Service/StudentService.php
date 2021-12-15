@@ -45,7 +45,7 @@ class StudentService
             // todo: update ObjectEntity->organzation to LanguageHouse
 //            var_dump('org '.$student['languageHouse']['@uri']);
             $objectEntity = ['organization' => $student['languageHouse']['@uri']];
-            $this->commonGroundService->updateResource($objectEntity, ['component' => 'gatewayAdmin', 'type' => 'object_entities', 'id' => $student['id']]);
+            $student = $this->commonGroundService->updateResource($objectEntity, ['component' => 'gatewayAdmin', 'type' => 'object_entities', 'id' => $student['id']]);
         }
 
         return $student;
