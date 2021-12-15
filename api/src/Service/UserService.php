@@ -6,59 +6,13 @@ namespace App\Service;
 
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
 
-class UserGroupService
+class UserService
 {
     private CommonGroundService $commonGroundService;
 
     public function __construct(CommonGroundService $commonGroundService)
     {
         $this->commonGroundService = $commonGroundService;
-    }
-
-    /**
-     * Saves the user for an employee in the gateway and UC
-     *
-     * @param array $employee
-     * @param string $action
-     * @return array
-     */
-    public function saveUser(array $employee, string $action): array
-    {
-        $existingUsers = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'users'], ['person' => $employee['person']['@uri']], false)['hydra:member'];
-        if (count($existingUsers) > 0) {
-            $existingUser = $existingUsers[0];
-        }
-
-        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
-        $user = [
-            "locale" => "nl",
-            "username" => $employee['person']['emails'][0]['email'],
-            "organization" => $employee['organization']['id'],
-            "userGroups" => $this->getUserGroups($employee['organization'], $employee['role']),
-            "person" => $employee['person']['id']
-        ];
-
-        if ($action == 'Create') {
-            if (isset($existingUser)) {
-                return ['Error' => 'There already exists a user for this person: ' . $employee['person']['@uri']];
-            }
-            // Temp password
-            $user['password'] = $this->randomPassword();
-            // (This will send a mail for a new user to change their password)
-            $user = $this->commonGroundService->createResource($user, ['component' => 'gateway', 'type' => 'users']);
-        } elseif ($action == 'Update') {
-            if (!isset($existingUser)) {
-                // TODO: maybe create a new user, even though we are doing an Update and not a Create ?
-                return ['Error' => 'Couldn\'t find a user for this person: ' . $employee['person']['@uri']];
-            }
-            if ($employee['person']['emails'][0]['email'] != $existingUser['username']) {
-                $user['currentPassword'] = '???'; // TODO!!!
-                return ['Error' => 'Changing a username is not implemented yet, we need a password for that'];
-            }
-            $user = $this->commonGroundService->updateResource($user, ['component' => 'gateway', 'type' => 'users', 'id' => $existingUser['id']]); //TODO
-        }
-
-        return $user;
     }
 
     /**
@@ -98,6 +52,92 @@ class UserGroupService
         return $userGroups;
     }
 
+    /**
+     * Saves the user for an employee in the gateway and UC
+     *
+     * @param array $employee
+     * @param string $action
+     * @return array
+     */
+    public function saveEmployeeUser(array $employee, string $action): array
+    {
+        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
+        $user = [
+            "locale" => "nl",
+            "username" => $employee['person']['emails'][0]['email'],
+            "organization" => $employee['organization']['id'],
+            "userGroups" => $this->getUserGroups($employee['organization'], $employee['role']),
+            "person" => $employee['person']['id']
+        ];
+
+        return $this->saveUser($user, $employee['person'], $action);
+    }
+
+    /**
+     * Saves the user for a student in the gateway and UC
+     *
+     * @param array $student
+     * @param string $action
+     * @return array
+     */
+    public function saveStudentUser(array $student, string $action): array
+    {
+        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
+        $user = [
+            "locale" => "nl",
+            "username" => $student['person']['emails'][0]['email'],
+            "organization" => array_key_exists('id', $student['languageHouse']) ? $student['languageHouse']['id'] : null, // TODO: replace null with a default organization?
+            "userGroups" => [],
+            "person" => $student['person']['id']
+        ];
+
+        return $this->saveUser($user, $student['person'], $action);
+    }
+
+    /**
+     * Saves a user in the gateway and UC
+     *
+     * @param array $user
+     * @param array $person
+     * @param string $action
+     * @return array|string[]
+     */
+    private function saveUser(array $user, array $person, string $action): array
+    {
+        $existingUsers = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'users'], ['person' => $person['@uri']], false)['hydra:member'];
+        if (count($existingUsers) > 0) {
+            $existingUser = $existingUsers[0];
+        }
+
+        if ($action == 'Create') {
+            if (isset($existingUser)) {
+                return ['Error' => 'There already exists a user for this person: ' . $person['@uri']];
+            }
+            // Temp password
+            $user['password'] = $this->randomPassword();
+            // Save user in the gateway (This will send a mail for a new user to change their password)
+            $user = $this->commonGroundService->createResource($user, ['component' => 'gateway', 'type' => 'users']);
+        } elseif ($action == 'Update') {
+            if (!isset($existingUser)) {
+                // TODO: maybe create a new user, even though we are doing an Update and not a Create ?
+                return ['Error' => 'Couldn\'t find a user for this person: ' . $person['@uri']];
+            }
+            if ($person['emails'][0]['email'] != $existingUser['username']) {
+                $user['currentPassword'] = '???'; // TODO!!!
+                return ['Error' => 'Changing a username is not implemented yet, we need a password for that'];
+            }
+            // Update user in the gateway (and UC because of that)
+            $user = $this->commonGroundService->updateResource($user, ['component' => 'gateway', 'type' => 'users', 'id' => $existingUser['id']]);
+        }
+
+        return $user;
+    }
+
+    /**
+     * Generates a random (temp) password
+     *
+     * @return string
+     */
     private function randomPassword() {
         $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890?></.,\\|\'";:]}[{=+-_)(*&^%$#@!`~';
         $pass = array(); //remember to declare $pass as an array

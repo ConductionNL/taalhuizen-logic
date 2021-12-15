@@ -5,7 +5,9 @@ namespace App\Controller;
 
 
 use App\Service\MailService;
-use App\Service\UserGroupService;
+use App\Service\EmployeeService;
+use App\Service\StudentService;
+use App\Service\UserService;
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -29,6 +31,9 @@ class NotificationController extends AbstractController
     public function createUserAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
+        if ($data['topic'] !== 'users') {
+            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != users)']), 400, ['Content-type' => 'application/json']);
+        }
         if ($data['action'] !== 'Create') {
             return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
@@ -45,14 +50,17 @@ class NotificationController extends AbstractController
     public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
-        $userGroupService = new UserGroupService($commonGroundService);
+        if ($data['topic'] !== 'organizations') {
+            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != organizations)']), 400, ['Content-type' => 'application/json']);
+        }
+        $userService = new UserService($commonGroundService);
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
             // Create new userGroups in UC for this organization depending on organization type
             $organization = $commonGroundService->getResource($data['resource'], [], false);
-            $userGroups = $userGroupService->saveUserGroups($organization);
+            $userGroups = $userService->saveUserGroups($organization);
         } elseif ($data['action'] === 'Delete') {
             // Delete existing userGroups of this organization
-            $userGroups = $userGroupService->deleteUserGroups($data['resource']);
+            $userGroups = $userService->deleteUserGroups($data['resource']);
         }
 
         $result = ['organization' => $data['resource']];
@@ -70,21 +78,27 @@ class NotificationController extends AbstractController
     public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
+        if ($data['topic'] !== 'employees') {
+            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != employees)']), 400, ['Content-type' => 'application/json']);
+        }
 
         // if create or update
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
-            $userGroupService = new UserGroupService($commonGroundService);
             // Retrieve employee object from gateway
             $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            $employeeService = new EmployeeService($commonGroundService);
+            $employee = $employeeService->checkOrganization($employee);
             // Create/update a user for it in the gateway with correct user groups
-            $user = $userGroupService->saveUser($employee, $data['action']);
+            $userService = new UserService($commonGroundService);
+            $user = $userService->saveEmployeeUser($employee, $data['action']);
         } elseif ($data['action'] === 'Delete') {
             // Do nothing! This is already handled by the gateway. including deleting the user from UC
         }
 
         $result = [
-            'employee'  => $data['resource'],
-            'user'      => $user ?? null
+            'employeeUri'    => $data['resource'],
+            'user'           => $user ?? null,
+            'employeeObject' => $employee ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
@@ -95,19 +109,70 @@ class NotificationController extends AbstractController
      */
     public function  createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
-        //TODO: see employee above this function
-
         $data = json_decode($request->getContent(), true);
+        if ($data['topic'] !== 'students') {
+            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != students)']), 400, ['Content-type' => 'application/json']);
+        }
 
         // if create or update
-        // get student, get the person from this student
-        // create (or update) user for this student with the person connection
-        // (send mail if needed)
+        if ($data['action'] === 'Create' || $data['action'] === 'Update') {
+            // Retrieve student object from gateway
+            $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            // Check if we need to find a LanguageHouse with the students address
+            $studentService = new StudentService($commonGroundService);
+            $student = $studentService->checkLanguageHouse($student); //TODO: test this
+            // Create/update a user for it in the gateway
+            $userService = new UserService($commonGroundService);
+            $user = $userService->saveStudentUser($student, $data['action']);
+        } elseif ($data['action'] === 'Delete') {
+            // Do nothing! This is already handled by the gateway. including deleting the user from UC
+        }
 
-        // if delete
-        // delete the user
+        $result = [
+            'studentUri'   => $data['resource'],
+            'user'      => $user ?? null,
+            'studentObject'   => $student ?? null
+        ];
 
-        $result = [];
+        return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
+    }
+
+    /**
+     * @Route ("/contact_moments", methods={"POST"})
+     */
+    public function  createContactMomentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    {
+        //TODO: test all of this
+        $data = json_decode($request->getContent(), true);
+        if ($data['topic'] !== 'contact_moments') { //TODO: check if this topic is correct?
+            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != contact_moments)']), 400, ['Content-type' => 'application/json']);
+        }
+        if ($data['action'] !== 'Create') {
+            return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
+        }
+
+        //Find employee with the owner/user of this contactMoment and connect it to it TODO: move this code to a new service!?
+        // Retrieve contactMoment object from gateway
+        $contactMoment = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+        // Get owner to get the employee and connect it to this contactMoment
+        // TODO: search through/in gateway instead of UC and MRC ?
+        $user = $this->commonGroundService->getResource(['component' => 'uc', 'type' => 'users', 'id' => $contactMoment['@owner']], [], false);
+        $employees = $this->commonGroundService->getResourceList(['component' => 'mrc', 'type' => 'employees'], ['person' => $user['person']], false);
+        if (count($employees) > 0) {
+            $employee = $employees[0];
+            $updateContactMoment = [
+                'employee' => $employee['id']
+            ];
+            $contactMoment = $this->commonGroundService->updateResource($updateContactMoment, ['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])]);
+        }
+
+        $result = [
+            'contactMomentUri'      => $data['resource'],
+            'user'                  => $user['@id'] ?? $contactMoment['@owner'],
+            'person'                => $user['person'],
+            'employee'              => isset($employee) ? $employee['@id'] : null,
+            'contactMomentObject'   => $contactMoment ?? null
+        ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
     }
