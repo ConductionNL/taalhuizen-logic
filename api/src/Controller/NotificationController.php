@@ -31,9 +31,6 @@ class NotificationController extends AbstractController
     public function createUserAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'users') {
-            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != users)']), 400, ['Content-type' => 'application/json']);
-        }
         if ($data['action'] !== 'Create') {
             return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
@@ -50,9 +47,6 @@ class NotificationController extends AbstractController
     public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'organizations') {
-            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != organizations)']), 400, ['Content-type' => 'application/json']);
-        }
         $userService = new UserService($commonGroundService);
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
             // Create new userGroups in UC for this organization depending on organization type
@@ -78,9 +72,6 @@ class NotificationController extends AbstractController
     public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService)
     {
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'employees') {
-            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != employees)']), 400, ['Content-type' => 'application/json']);
-        }
 
         // if create or update
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
@@ -110,9 +101,6 @@ class NotificationController extends AbstractController
     public function  createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'students') {
-            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != students)']), 400, ['Content-type' => 'application/json']);
-        }
 
         // if create or update
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
@@ -144,9 +132,6 @@ class NotificationController extends AbstractController
     {
         //TODO: test all of this
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'contactmoment') { //TODO: check if this topic is correct?
-            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != contactmoment)']), 400, ['Content-type' => 'application/json']);
-        }
         if ($data['action'] !== 'Create') {
             return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
