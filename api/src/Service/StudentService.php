@@ -44,8 +44,8 @@ class StudentService
         elseif (array_key_exists('intake', $student) && array_key_exists('status', $student['intake']) && $student['intake']['status'] == 'PENDING') {
             // todo: update ObjectEntity->organzation to LanguageHouse
 //            var_dump('org '.$student['languageHouse']['@uri']);
-            $objectEntity = ['organization' => $student['languageHouse']['@uri']];
-            $this->commonGroundService->updateResource($objectEntity, ['component' => 'gatewayAdmin', 'type' => 'object_entities', 'id' => $student['id']]);
+            $objectEntity = ['@organization' => $student['languageHouse']['@uri']];
+            $this->commonGroundService->updateResource($objectEntity, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
 
         return $student;
