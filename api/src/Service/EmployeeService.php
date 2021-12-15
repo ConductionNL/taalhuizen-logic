@@ -44,8 +44,8 @@ class EmployeeService
         elseif (array_key_exists('intake', $employee) && array_key_exists('status', $employee['intake']) && $employee['intake']['status'] == 'PENDING') {
             // todo: update ObjectEntity->organzation to LanguageHouse
 //            var_dump('org '.$student['languageHouse']['@uri']);
-            $employeeUpdate['@organization'] = $employee['organization']['@uri'];
-            $employeeUpdate['person'] = $employee['person']['@uri'];
+            $employeeUpdate['@organization'] = $employee['organization']['id'];
+            $employeeUpdate['person'] = $employee['person']['id'];
             $employee = $this->commonGroundService->updateResource($employeeUpdate, ['component' => 'gateway', 'type' => 'employees', 'id' => $employee['id']]);
         }
 
