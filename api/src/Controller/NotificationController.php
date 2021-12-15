@@ -120,7 +120,7 @@ class NotificationController extends AbstractController
             $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
             // Check if we need to find a LanguageHouse with the students address
             $studentService = new StudentService($commonGroundService);
-            $student = $studentService->checkLanguageHouse($student); //TODO: test this
+            $student = $studentService->checkLanguageHouse($student);
             // Create/update a user for it in the gateway
             $userService = new UserService($commonGroundService);
             $user = $userService->saveStudentUser($student, $data['action']);
@@ -144,8 +144,8 @@ class NotificationController extends AbstractController
     {
         //TODO: test all of this
         $data = json_decode($request->getContent(), true);
-        if ($data['topic'] !== 'contact_moments') { //TODO: check if this topic is correct?
-            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != contact_moments)']), 400, ['Content-type' => 'application/json']);
+        if ($data['topic'] !== 'contactmoment') { //TODO: check if this topic is correct?
+            return new Response(json_encode(['message' => 'Wrong topic. ('.$data['topic'].' != contactmoment)']), 400, ['Content-type' => 'application/json']);
         }
         if ($data['action'] !== 'Create') {
             return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
