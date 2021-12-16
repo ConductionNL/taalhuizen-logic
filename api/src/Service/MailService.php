@@ -49,4 +49,31 @@ class MailService
 
         return true;
     }
+
+    public function sendShareStudentMail(array $shareStudent, string $subject): bool
+    {
+        $service = $this->commonGroundService->getResourceList(['component' => 'bs', 'type' => 'services'])['hydra:member'][0];
+        $parameters = [
+            'fullname' => $shareStudent['email'],
+            'studentName' => $shareStudent['student']['person']['name'],
+            'subject'   => $subject,
+        ];
+
+        $content = $this->twig->render('share-student-e-mail.html.twig', $parameters);
+
+        $message = $this->commonGroundService->createResource(
+            [
+                'reciever' => $shareStudent['email'],
+                'sender'   => 'taalhuizen@biscutrecht.nl',
+                'content'  => $content,
+                'type'     => 'email',
+                'status'   => 'queued',
+                'service'  => '/services/' . $service['id'],
+                'subject'  => $subject,
+            ],
+            ['component' => 'bs', 'type' => 'messages']
+        );
+
+        return true;
+    }
 }
