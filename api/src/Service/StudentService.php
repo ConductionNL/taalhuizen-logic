@@ -24,7 +24,7 @@ class StudentService
     public function checkLanguageHouse(array $student): array
     {
         // If this student has no LanguageHouse
-        if (!array_key_exists('id', $student['languageHouse'])) {
+        if (!array_key_exists('@uri', $student['languageHouse'])) {
             // todo: this is disabled for now
 //            // Find a LanguageHouse with the address of this student
 //            $postalCodes = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'postal_codes'], ['code' => substr($student['person']['addresses'][0]['postalCode'], 0, 4)])['results'];
@@ -41,8 +41,8 @@ class StudentService
             //todo, if we put this ^ back also make sure to add the part below somehow
         }
         // If this student does have a LanguageHouse & intake status == PENDING (public registration Release 3 Scenario 5.0)
-        elseif (array_key_exists('intake', $student) && array_key_exists('status', $student['intake']) && $student['intake']['status'] == 'PENDING') {
-            // todo: update ObjectEntity->organzation to LanguageHouse
+//        elseif (array_key_exists('intake', $student) && array_key_exists('status', $student['intake']) && $student['intake']['status'] == 'PENDING') {
+        else {
 //            var_dump('org '.$student['languageHouse']['@uri']);
             $studentUpdate['@organization'] = $student['languageHouse']['@uri'];
             $studentUpdate['person'] = $student['person']['id'];
