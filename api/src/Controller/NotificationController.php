@@ -42,6 +42,22 @@ class NotificationController extends AbstractController
     }
 
     /**
+     * @Route ("/share_student", methods={"POST"})
+     */
+    public function createShareStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    {
+        $data = json_decode($request->getContent(), true);
+        if ($data['action'] !== 'Create') {
+            return new Response(json_encode(['shareStudent' => $data['resource']]), 200, ['Content-type' => 'application/json']);
+        }
+        $shareStudent = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'share_students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+        $mailService = new MailService($commonGroundService, $twig);
+        $mailService->sendShareStudentMail($shareStudent, 'Er is een student met u gedeeld');
+
+        return new Response(json_encode(['shareStudent' => $data['resource']]), 200, ['Content-type' => 'application/json']);
+    }
+
+    /**
      * @Route ("/organizations", methods={"POST"})
      */
     public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService)
@@ -108,7 +124,7 @@ class NotificationController extends AbstractController
             $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
             // Check if we need to find a LanguageHouse with the students address
             $studentService = new StudentService($commonGroundService);
-            $student = $studentService->checkLanguageHouse($student);
+            $student = $studentService->checkStudent($student);
             // Create/update a user for it in the gateway
             $userService = new UserService($commonGroundService);
             $user = $userService->saveStudentUser($student, $data['action']);

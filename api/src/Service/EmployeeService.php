@@ -16,7 +16,7 @@ class EmployeeService
     }
 
     /**
-     * Checks if we need to find a LanguageHouse with the students address and if so update the student and return the updated student.
+     * Sets the correct @organization for the employee in the gateway
      *
      * @param array $employee
      * @return array
