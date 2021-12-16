@@ -16,12 +16,25 @@ class StudentService
     }
 
     /**
-     * Checks if we need to find a LanguageHouse with the students address and if so update the student and return the updated student.
+     * Sets the correct values for the student in the gateway
      *
      * @param array $student
      * @return array
      */
-    public function checkLanguageHouse(array $student): array
+    public function checkStudent(array $student): array
+    {
+        $studentUpdate = $this->checkLanguageHouse($student);
+        $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
+        return $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
+    }
+
+    /**
+     * Returns a student body with the correct @organization for updating the student in the gateway
+     *
+     * @param array $student
+     * @return array
+     */
+    private function checkLanguageHouse(array $student): array
     {
         // If this student has no LanguageHouse
         if (!array_key_exists('@uri', $student['languageHouse'])) {
@@ -32,11 +45,10 @@ class StudentService
 //                $languageHouse = $postalCodes[0]['languageHouse'];
 //
 //                // If we found a LanguageHouse connect it to the student.
-//                $updateStudent = [
+//                $studentUpdate = [
 //                    'languageHouse' => $languageHouse['id'],
 //                    'person' => $student['person']['id']
 //                ];
-//                $student = $this->commonGroundService->updateResource($updateStudent, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
 //            }
             //todo, if we put this ^ back also make sure to add the part below somehow
         }
@@ -47,9 +59,24 @@ class StudentService
             $studentUpdate['@organization'] = $student['languageHouse']['@uri'];
             $studentUpdate['person'] = $student['person']['id'];
             $studentUpdate['languageHouse'] = $student['languageHouse']['id'];
-            $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
 
-        return $student;
+        return $studentUpdate;
+    }
+
+    /**
+     * Returns a student body with the correct intake status for updating the student in the gateway
+     *
+     * @param array $student
+     * @return array
+     */
+    private function checkIntakeStatus(array $student, array $studentUpdate): array
+    {
+        if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake'])) {
+            $studentUpdate['intake'] = $student['intake'];
+            $studentUpdate['intake']['status'] = 'ACCEPTED';
+        }
+
+        return $studentUpdate;
     }
 }
