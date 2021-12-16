@@ -73,8 +73,13 @@ class StudentService
     private function checkIntakeStatus(array $student, array $studentUpdate): array
     {
         if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake'])) {
-            $studentUpdate['intake'] = $student['intake'];
-            $studentUpdate['intake']['status'] = 'ACCEPTED';
+            $studentUpdate['intake'] = [
+                'status' => 'ACCEPTED',
+                'didSignPermissionForm' => $student['intake']['didSignPermissionForm'],
+                'hasPermissionToShareDataWithProviders' => $student['intake']['hasPermissionToShareDataWithProviders'],
+                'hasPermissionToShareDataWithLibraries' => $student['intake']['hasPermissionToShareDataWithLibraries'],
+                'hasPermissionToSendInformationAboutLibraries' => $student['intake']['hasPermissionToSendInformationAboutLibraries']
+            ];
         }
 
         return $studentUpdate;

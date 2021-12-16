@@ -149,7 +149,7 @@ class NotificationController extends AbstractController
         //TODO: test all of this
         $data = json_decode($request->getContent(), true);
         if ($data['action'] !== 'Create') {
-            return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
+            return new Response(json_encode(['contactMomentUri' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
 
         //Find employee with the owner/user of this contactMoment and connect it to it TODO: move this code to a new service!?
@@ -158,10 +158,14 @@ class NotificationController extends AbstractController
         // Get owner to get the employee and connect it to this contactMoment
         // TODO: search through/in gateway instead of UC and MRC ?
         $user = $this->commonGroundService->getResource(['component' => 'uc', 'type' => 'users', 'id' => $contactMoment['@owner']], [], false);
-        $employees = $this->commonGroundService->getResourceList(['component' => 'mrc', 'type' => 'employees'], ['person' => $user['person']], false);
+        $employees = $this->commonGroundService->getResourceList(['component' => 'mrc', 'type' => 'employees'], ['person' => $user['person']], false)['hydra:member'];
         if (count($employees) > 0) {
             $employee = $employees[0];
             $updateContactMoment = [
+                'student' => $contactMoment['student']['id'],
+                'type' => $contactMoment['type'],
+                'explanation' => $contactMoment['explanation'],
+                'date' => $contactMoment['date'],
                 'employee' => $employee['id']
             ];
             $contactMoment = $this->commonGroundService->updateResource($updateContactMoment, ['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])]);
