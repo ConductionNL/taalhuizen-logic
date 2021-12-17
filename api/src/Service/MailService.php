@@ -55,7 +55,7 @@ class MailService
         $service = $this->commonGroundService->getResourceList(['component' => 'bs', 'type' => 'services'])['hydra:member'][0];
         $parameters = [
             'fullname' => $shareStudent['email'],
-            'studentName' => $shareStudent['student']['person']['name'],
+            'studentName' => $shareStudent['student']['person']['givenName'],
             'subject'   => $subject,
         ];
 
