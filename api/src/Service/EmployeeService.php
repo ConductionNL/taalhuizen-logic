@@ -24,7 +24,7 @@ class EmployeeService
     public function checkOrganization(array $employee): array
     {
         // If this employee has an organization
-        if (array_key_exists('@uri', $employee['organization']) && $employee['organization'] !== $employee['organization']['@uri']) {
+        if (array_key_exists('@uri', $employee['organization']) && $employee['@organization'] !== $employee['organization']['@uri']) {
 //            var_dump('org '.$employee['organization']['@uri']);
             $employeeUpdate['@organization'] = $employee['organization']['@uri'];
             $employeeUpdate['person'] = $employee['person']['id'];
