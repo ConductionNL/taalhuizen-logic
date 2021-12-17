@@ -124,7 +124,9 @@ class NotificationController extends AbstractController
             $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
             // Check if we need to find a LanguageHouse with the students address
             $studentService = new StudentService($commonGroundService);
-            $student = $studentService->checkStudent($student);
+            if ($data['action'] === 'Create') {
+                $student = $studentService->checkStudent($student);
+            }
             // Create/update a user for it in the gateway
             $userService = new UserService($commonGroundService);
             $user = $userService->saveStudentUser($student, $data['action']);
