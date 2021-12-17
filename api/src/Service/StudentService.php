@@ -26,7 +26,7 @@ class StudentService
         $studentUpdate = $this->checkLanguageHouse($student);
         $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
 
-        if ($student['organization'] !== $student['languageHouse']['@uri'] || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
+        if ($student['@organization'] !== $student['languageHouse']['@uri'] || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
             $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
 
