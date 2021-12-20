@@ -74,27 +74,6 @@ class UserService
     }
 
     /**
-     * Saves the user for a student in the gateway and UC
-     *
-     * @param array $student
-     * @param string $action
-     * @return array
-     */
-    public function saveStudentUser(array $student, string $action): array
-    {
-        // create (or update) user for this employee with the person connection and correct userGroups (switch employee role)
-        $user = [
-            "locale" => "nl",
-            "username" => $student['person']['emails'][0]['email'],
-            "organization" => array_key_exists('id', $student['languageHouse']) ? $student['languageHouse']['id'] : null, // TODO: replace null with a default organization?
-            "userGroups" => [],
-            "person" => $student['person']['id']
-        ];
-
-        return $this->saveUser($user, $student['person'], $action);
-    }
-
-    /**
      * Saves a user in the gateway and UC
      *
      * @param array $user
