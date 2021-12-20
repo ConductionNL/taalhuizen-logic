@@ -117,26 +117,18 @@ class NotificationController extends AbstractController
     public function  createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-
-        // if create or update
-        if ($data['action'] === 'Create' || $data['action'] === 'Update') {
-            // Retrieve student object from gateway
-            $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
-            // Check if we need to find a LanguageHouse with the students address
-            $studentService = new StudentService($commonGroundService);
-            if ($data['action'] === 'Create') {
-                $student = $studentService->checkStudent($student);
-            }
-            // Create/update a user for it in the gateway
-            $userService = new UserService($commonGroundService);
-            $user = $userService->saveStudentUser($student, $data['action']);
-        } elseif ($data['action'] === 'Delete') {
-            // Do nothing! This is already handled by the gateway. including deleting the user from UC
+        if ($data['action'] !== 'Create') {
+            return new Response(json_encode(['studentUri' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
+
+        // Retrieve student object from gateway
+        $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+        // Check if we need to find a LanguageHouse with the students address
+        $studentService = new StudentService($commonGroundService);
+        $student = $studentService->checkStudent($student);
 
         $result = [
             'studentUri'   => $data['resource'],
-            'user'      => $user ?? null,
             'studentObject'   => $student ?? null
         ];
 
