@@ -63,7 +63,7 @@ class StudentService
 //            var_dump('org '.$student['languageHouse']['@uri']);
             $studentUpdate['@organization'] = $student['languageHouse']['@uri'];
             $studentUpdate['person'] = $student['person']['id'];
-            $studentUpdate['languageHouse'] = $student['languageHouse']['id'];
+//            $studentUpdate['languageHouse'] = $student['languageHouse']['id']; // This attribute is immutable
         }
 
         return $studentUpdate;
