@@ -28,6 +28,7 @@ class EmployeeService
 //            var_dump('org '.$employee['organization']['@uri']);
             $employeeUpdate['@organization'] = $employee['organization']['@uri'];
             $employeeUpdate['person'] = $employee['person']['id'];
+            $employeeUpdate['role'] = $employee['role'];
             $employee = $this->commonGroundService->updateResource($employeeUpdate, ['component' => 'gateway', 'type' => 'employees', 'id' => $employee['id']]);
         }
 
