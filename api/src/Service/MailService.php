@@ -90,7 +90,7 @@ class MailService
             'subject'   => $subject,
         ];
 
-        $content = $this->twig->render('share-student-e-mail.html.twig', $parameters); // TODO: new email template
+        $content = $this->twig->render('employee-exists-e-mail.html.twig', $parameters);
 
         $message = $this->commonGroundService->createResource(
             [
