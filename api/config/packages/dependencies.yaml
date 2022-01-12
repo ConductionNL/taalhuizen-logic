@@ -23,10 +23,12 @@ parameters:
             auth: apikey
             location: https://backend-bisc-dev.commonground.nu/api
             apikey: 5fbffbf5-412a-41bc-82bf-3b41d71246ea
+            locale: null
         gatewayAdmin:
             auth: apikey
             location: https://backend-bisc-dev.commonground.nu/admin
             apikey: 5fbffbf5-412a-41bc-82bf-3b41d71246ea
+            locale: null
         cc:
             auth: apikey
             location: https://taalhuizen-bisc.commonground.nu/api/v1/cc
