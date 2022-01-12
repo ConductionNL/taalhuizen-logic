@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1641914681">
-  <project timestamp="1641914681">
+<coverage generated="1641976099">
+  <project timestamp="1641976099">
     <file name="/srv/api/src/Controller/NotificationController.php">
       <class name="App\Controller\NotificationController" namespace="global">
         <metrics complexity="22" methods="7" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="79" coveredstatements="0" elements="86" coveredelements="0"/>
@@ -243,7 +243,7 @@
       <line num="103" type="stmt" count="0"/>
       <line num="105" type="stmt" count="0"/>
       <line num="108" type="stmt" count="0"/>
-      <metrics loc="110" ncloc="109" classes="1" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="54" coveredstatements="0" elements="58" coveredelements="0"/>
+      <metrics loc="110" ncloc="110" classes="1" methods="4" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="54" coveredstatements="0" elements="58" coveredelements="0"/>
     </file>
     <file name="/srv/api/src/Service/StudentService.php">
       <class name="App\Service\StudentService" namespace="global">
@@ -449,6 +449,6 @@
       <line num="430" type="stmt" count="0"/>
       <metrics loc="432" ncloc="310" classes="1" methods="17" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="152" coveredstatements="0" elements="169" coveredelements="0"/>
     </file>
-    <metrics files="9" loc="1021" ncloc="839" classes="9" methods="45" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="350" coveredstatements="0" elements="395" coveredelements="0"/>
+    <metrics files="9" loc="1021" ncloc="840" classes="9" methods="45" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="350" coveredstatements="0" elements="395" coveredelements="0"/>
   </project>
 </coverage>
