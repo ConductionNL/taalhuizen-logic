@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
+use function Symfony\Component\Translation\t;
 
 class NotificationController extends AbstractController
 {
@@ -35,8 +36,8 @@ class NotificationController extends AbstractController
             return new Response(json_encode(['username' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
         $user = $commonGroundService->getResource($data['resource']);
-        $mailService = new MailService($commonGroundService, $twig);
-        $mailService->sendWelcomeMail($user, 'Welkom bij TOP', $parameterBag->get('frontendLocation'));
+        $mailService = new MailService($commonGroundService, $twig, $parameterBag);
+        $mailService->sendWelcomeMail($user, 'Welkom bij TOP');
 
         return new Response(json_encode(['user' => $data['resource']]), 200, ['Content-type' => 'application/json']);
     }
@@ -51,7 +52,7 @@ class NotificationController extends AbstractController
             return new Response(json_encode(['shareStudent' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
         $shareStudent = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'share_students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
-        $mailService = new MailService($commonGroundService, $twig);
+        $mailService = new MailService($commonGroundService, $twig, $parameterBag);
         $mailService->sendShareStudentMail($shareStudent, 'Er is een student met u gedeeld');
 
         return new Response(json_encode(['shareStudent' => $data['resource']]), 200, ['Content-type' => 'application/json']);
@@ -60,10 +61,11 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/organizations", methods={"POST"})
      */
-    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService)
+    public function createOrEditOrganizationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        $userService = new UserService($commonGroundService);
+        $mailService = new MailService($commonGroundService, $twig, $parameterBag);
+        $userService = new UserService($commonGroundService, $mailService);
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
             // Create new userGroups in UC for this organization depending on organization type
             $organization = $commonGroundService->getResource($data['resource'], [], false);
@@ -85,7 +87,7 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/employees", methods={"POST"})
      */
-    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService)
+    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
 
@@ -96,13 +98,23 @@ class NotificationController extends AbstractController
             $employeeService = new EmployeeService($commonGroundService);
             $employee = $employeeService->checkOrganization($employee);
             // Create/update a user for it in the gateway with correct user groups
-            $userService = new UserService($commonGroundService);
+            $mailService = new MailService($commonGroundService, $twig, $parameterBag);
+            $userService = new UserService($commonGroundService, $mailService);
             $user = $userService->saveEmployeeUser($employee, $data['action']);
+            if (isset($user['employee'])) {
+                $employee = $user['employee'];
+                unset($user['employee']);
+            }
+            if (isset($user['message'])) {
+                $message = $user['message'];
+                unset($user['message']);
+            }
         } elseif ($data['action'] === 'Delete') {
             // Do nothing! This is already handled by the gateway. including deleting the user from UC
         }
 
         $result = [
+            'message'        => $message ?? null,
             'employeeUri'    => $data['resource'],
             'user'           => $user ?? null,
             'employeeObject' => $employee ?? null

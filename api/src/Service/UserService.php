@@ -5,14 +5,17 @@ namespace App\Service;
 
 
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
+use Twig\Environment;
 
 class UserService
 {
     private CommonGroundService $commonGroundService;
+    private MailService $mailService;
 
-    public function __construct(CommonGroundService $commonGroundService)
+    public function __construct(CommonGroundService $commonGroundService, MailService $mailService)
     {
         $this->commonGroundService = $commonGroundService;
+        $this->mailService = $mailService;
     }
 
     /**
@@ -70,7 +73,52 @@ class UserService
             "person" => $employee['person']['id']
         ];
 
+        if ($action == 'Create') {
+            $existingUser = $this->employeeUserExistsWithUsername($user, $employee);
+            if (!is_null($existingUser)) {
+                return $existingUser;
+            }
+        }
+
         return $this->saveUser($user, $employee['person'], $action);
+    }
+
+    /**
+     * Checks if a (employee) user exists with the given email, and if so handle accordingly.
+     *
+     * @param array $user
+     * @return array|null
+     */
+    private function employeeUserExistsWithUsername(array $user, array $employee): ?array
+    {
+        //Check if a user exists with $user['username'] email.
+        $existingUsers = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'users'], ['username' => urlencode($user['username'])], false)['hydra:member'];
+        if (count($existingUsers) > 0) {
+            $existingUser = $existingUsers[0];
+            //If a user exists with the email, check if an employee already exists with this user.
+            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $existingUser['person']])['results']; // add to query?: 'person.user.username' => $existingUser['username'] OR: 'person.emails.email' => $existingUser['username']
+            if (count($existingEmployees) > 0) {
+                $employee = $existingEmployees[0];
+                //If an employee exists with this user, delete new employee and send email to the existing user.
+                $this->commonGroundService->deleteResource(null, ['component' => 'gateway', 'type' => 'employees', 'id' => $employee['id']]);
+                $this->mailService->sendEmployeeExistsMail($existingUser, 'Iemand heeft geprobeerd een medewerker toe te voegen met uw email');
+
+                $user['message'] = "Warning: There already exists an user with this email and an employee with this user['person']. Deleted new created employee and send warning email.";
+            } else {
+                //If no employee exists with this user, (connect new employee to the user, done by: ) update user with correct data (person id!) & send reset-password/welcome email.
+                $user = $this->commonGroundService->updateResource($user, ['component' => 'gateway', 'type' => 'users', 'id' => $existingUser['id']]);
+                $this->mailService->sendWelcomeMail($this->commonGroundService->getResource($user['@uri']), 'Welkom bij TOP');
+                $employee = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'employees', 'id' => $employee['id']], [], false);
+
+                $user['message'] = "Warning: There already exists an user with this email, connected new employee to this existing user.";
+            }
+        } else {
+            //If no user exists with this email, return null.
+            return null;
+        }
+
+        $user['employee'] = $employee;
+        return $user;
     }
 
     /**
