@@ -5,6 +5,8 @@ namespace App\Service;
 
 
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
+use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class UserService
 {
@@ -396,5 +398,84 @@ class UserService
         }
 
         return $userGroups;
+    }
+
+    /**
+     * Retrieves all user groups for a certain code (name)
+     * @param string $code The code(name) for the user groups
+     * @return array the user groups
+     */
+    private function getAllUserGroupsOfType (string $code): array
+    {
+        return $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['name' => $code, 'limit' => 1000])['hydra:member'];
+    }
+
+    /**
+     * Splits out all scope ids from a usergroup
+     * @param array $userGroup The user group to get the scopes for
+     * @return array An array of scope ids in the user group
+     */
+    private function getAllScopeIdsForUserGroup (array $userGroup): array
+    {
+        $scopeIds = [];
+        foreach($userGroup['scopes'] as $scope)
+        {
+            $scopeIds[] = "/scopes/{$scope['id']}";
+        }
+        return $scopeIds;
+    }
+
+    private function addScopesToUserGroup(array $currentScopes, array $scopesToAdd): array
+    {
+        foreach($scopesToAdd as $scope)
+        {
+            if(!in_array($scope, $currentScopes)){
+                $currentScopes[] = $scope;
+            }
+        }
+        return $currentScopes;
+    }
+
+    private function removeScopesFromUserGroup(array $currentScopes, array $scopesToRemove): array
+    {
+        foreach($currentScopes as $key=>$scope){
+            if(in_array($scope, $scopesToRemove)){
+                unset($currentScopes[$key]);
+            }
+        }
+        return array_values($currentScopes);
+    }
+
+    public function mutateScopes(string $directive, string $code, array $scopes, SymfonyStyle $io): int
+    {
+        $errorCount = 0;
+        $userGroups = $this->getAllUserGroupsOfType($code);
+
+        $io->progressStart(count($userGroups));
+        foreach($userGroups as $userGroup){
+            $io->section("Checking userGroup {$userGroup['id']}");
+            $currentScopes = $this->getAllScopeIdsForUserGroup($userGroup);
+            switch($directive)
+            {
+                case 'add':
+                    $userGroup['scopes'] = $this->addScopesToUserGroup($currentScopes, $scopes);
+                    break;
+                case 'remove':
+                    $userGroup['scopes'] = $this->removeScopesFromUserGroup($currentScopes, $scopes);
+                    break;
+            }
+            try{
+                unset($userGroup['users']);
+                unset($userGroup['children']);
+                $this->commonGroundService->updateResource($userGroup, ['component' => 'uc', 'type' => 'groups', 'id' => $userGroup['id']]);
+            } catch(RequestException $exception){
+                $io->error($exception->getMessage());
+                $errorCount++;
+            }
+            $io->text('UserGroup had '.count($currentScopes).' scopes, now has '.count($userGroup['scopes']).' scopes. '.(count($userGroup['scopes'])-count($currentScopes)).' scopes have been added');
+            $io->progressAdvance();
+        }
+        $io->progressFinish();
+        return round($errorCount/count($userGroups)*100) == 0 && $errorCount > 0 ? 1 : round($errorCount/count($userGroups)*100);
     }
 }
