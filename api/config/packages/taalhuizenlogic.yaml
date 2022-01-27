@@ -1,4 +1,4 @@
 parameters:
-  env(FRONTEND_LOCATION): "https://taalhuizen-bisc.commonground.nu"
+  env(FRONTEND_URL): "https://taalhuizen-bisc.commonground.nu"
 
-  frontendLocation: "%env(FRONTEND_LOCATION)%"
+  frontendLocation: "%env(FRONTEND_URL)%"
