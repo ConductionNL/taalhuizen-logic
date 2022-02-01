@@ -25,8 +25,11 @@ class StudentService
     {
         $studentUpdate = $this->checkLanguageHouse($student);
         $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
+//        $studentUpdate = $this->checkMentor($student, $studentUpdate);
+//        $studentUpdate = $this->checkTeam($student, $studentUpdate);
 
-        if ($student['@organization'] !== $student['languageHouse']['@uri'] || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
+        if ($student['@organization'] !== $student['languageHouse']['@uri']
+            || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
             $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
 
@@ -73,11 +76,13 @@ class StudentService
      * Returns a student body with the correct intake status for updating the student in the gateway
      *
      * @param array $student
+     * @param array $studentUpdate
      * @return array
      */
     private function checkIntakeStatus(array $student, array $studentUpdate): array
     {
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
+        // If manual registration, set intake status to accepted
         if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake'])) {
             $studentUpdate['intake'] = [
                 'status' => 'ACCEPTED',
@@ -87,6 +92,25 @@ class StudentService
                 'hasPermissionToSendInformationAboutLibraries' => $student['intake']['hasPermissionToSendInformationAboutLibraries']
             ];
         }
+
+        return $studentUpdate;
+    }
+
+    /**
+     * Returns a student body with the correct mentor employee for updating the student in the gateway
+     *
+     * @param array $student
+     * @param array $studentUpdate
+     * @return array
+     */
+    private function checkMentor(array $student, array $studentUpdate): array
+    {
+        // todo:
+        // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
+        // If manual registration, ...
+//        if (!empty($student['@owner']) && ...) {
+//            $studentUpdate['mentor'] = "";
+//        }
 
         return $studentUpdate;
     }
