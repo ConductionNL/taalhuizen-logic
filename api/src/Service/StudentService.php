@@ -23,13 +23,14 @@ class StudentService
      */
     public function checkStudent(array $student): array
     {
-        $studentUpdate = $this->checkLanguageHouse($student);
-        $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
-//        $studentUpdate = $this->checkMentor($student, $studentUpdate);
-//        $studentUpdate = $this->checkTeam($student, $studentUpdate);
-
         if ($student['@organization'] !== $student['languageHouse']['@uri']
             || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
+            $studentUpdate = $this->checkLanguageHouse($student);
+            $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
+            $studentUpdate = $this->checkMentor($student, $studentUpdate);
+
+            $studentUpdate['person'] = $student['person']['id'];
+
             $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
 
@@ -65,7 +66,6 @@ class StudentService
         else {
 //            var_dump('org '.$student['languageHouse']['@uri']);
             $studentUpdate['@organization'] = $student['languageHouse']['@uri'];
-            $studentUpdate['person'] = $student['person']['id'];
 //            $studentUpdate['languageHouse'] = $student['languageHouse']['id']; // This attribute is immutable
         }
 
@@ -105,12 +105,19 @@ class StudentService
      */
     private function checkMentor(array $student, array $studentUpdate): array
     {
-        // todo:
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
-        // If manual registration, ...
-//        if (!empty($student['@owner']) && ...) {
-//            $studentUpdate['mentor'] = "";
-//        }
+        // If manual registration, set mentor to the employee who did the registration
+        if (!empty($student['@owner'])) {
+            // Find the user that created this student resource
+            if (!$user = $this->commonGroundService->isResource($student['@owner'])) {
+                $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]));
+            }
+            // Get the employee using the person from this user.
+            $person = $user['person'];
+            // todo...
+
+            $studentUpdate['mentor'] = ""; // todo: The employee uuid of the owner
+        }
 
         return $studentUpdate;
     }
