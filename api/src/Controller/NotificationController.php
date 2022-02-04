@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Service\MailService;
 use App\Service\EmployeeService;
+use App\Service\OrganizationService;
 use App\Service\StudentService;
 use App\Service\UserService;
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
@@ -70,24 +71,36 @@ class NotificationController extends AbstractController
             // Create new userGroups in UC for this organization depending on organization type
             $organization = $commonGroundService->getResource($data['resource'], [], false);
             $userGroups = $userService->saveUserGroups($organization);
+
+            // Create a new team for new taalhuis
+            if ($data['action'] === 'Create' && $organization['type'] == 'taalhuis') {
+                $organizationService = new OrganizationService($commonGroundService);
+                $team = $organizationService->createTeamForLanguageHouse($organization);
+            }
         } elseif ($data['action'] === 'Delete') {
             // Delete existing userGroups of this organization
             $userGroups = $userService->deleteUserGroups($data['resource']);
         }
 
-        $result = ['organization' => $data['resource']];
+        $result = [
+            'organizationUri'       => $data['resource'] ?? null,
+            'userGroupObjects'      => $userGroups ?? 'Something went wrong',
+            'CCOrganizationObject'  => $organization ?? null
+        ];
+        if (isset($team)) {
+            $result['GatewayTeamObject'] = $team ?? null;
+        }
         if ($data['action'] === 'Delete') {
             $result['action'] = $data['action'];
             $result['note'] = 'userGroups contains info of the Deleted userGroups';
         }
-        $result['userGroups'] = $userGroups ?? 'Something went wrong';
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
     }
 
     /**
      * @Route ("/employees", methods={"POST"})
      */
-    public function  createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createOrEditEmployeeAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
 
@@ -114,10 +127,10 @@ class NotificationController extends AbstractController
         }
 
         $result = [
-            'message'        => $message ?? null,
-            'employeeUri'    => $data['resource'],
-            'user'           => $user ?? null,
-            'employeeObject' => $employee ?? null
+            'message'               => $message ?? null,
+            'employeeUri'           => $data['resource'],
+            'GatewayUserObject'     => $user ?? null,
+            'GatewayEmployeeObject' => $employee ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
@@ -126,7 +139,7 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/students", methods={"POST"})
      */
-    public function  createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
         if ($data['action'] !== 'Create') {
@@ -140,8 +153,8 @@ class NotificationController extends AbstractController
         $student = $studentService->checkStudent($student);
 
         $result = [
-            'studentUri'   => $data['resource'],
-            'studentObject'   => $student ?? null
+            'studentUri'            => $data['resource'],
+            'GatewayStudentObject'  => $student ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
@@ -150,7 +163,7 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/contact_moments", methods={"POST"})
      */
-    public function  createContactMomentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createContactMomentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         //TODO: test all of this
         $data = json_decode($request->getContent(), true);
@@ -168,21 +181,21 @@ class NotificationController extends AbstractController
         if (count($employees) > 0) {
             $employee = $employees[0];
             $updateContactMoment = [
-                'student' => $contactMoment['student']['id'],
-                'type' => $contactMoment['type'],
-                'explanation' => $contactMoment['explanation'],
-                'date' => $contactMoment['date'],
-                'employee' => $employee['id']
+                'student'       => $contactMoment['student']['id'],
+                'type'          => $contactMoment['type'],
+                'explanation'   => $contactMoment['explanation'],
+                'date'          => $contactMoment['date'],
+                'employee'      => $employee['id']
             ];
             $contactMoment = $this->commonGroundService->updateResource($updateContactMoment, ['component' => 'gateway', 'type' => 'contact_moments', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])]);
         }
 
         $result = [
-            'contactMomentUri'      => $data['resource'],
-            'user'                  => $user['@id'] ?? $contactMoment['@owner'],
-            'person'                => $user['person'],
-            'employee'              => isset($employee) ? $employee['@id'] : null,
-            'contactMomentObject'   => $contactMoment ?? null
+            'contactMomentUri'              => $data['resource'],
+            'userUri'                       => $user['@id'] ?? $contactMoment['@owner'],
+            'userPersonUri'                 => $user['person'],
+            'MRCEmployeeObject'             => isset($employee) ? $employee['@id'] : null,
+            'GatewayContactMomentObject'    => $contactMoment ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
