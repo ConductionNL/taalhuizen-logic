@@ -108,15 +108,17 @@ class StudentService
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
         // If manual registration, set mentor to the employee who did the registration
         if (!empty($student['@owner'])) {
-            // Find the user that created this student resource
+            // Find the user that created this student resource (check for $student['@owner'] = url or, else $student['@owner'] = uuid)
             if (!$user = $this->commonGroundService->isResource($student['@owner'])) {
                 $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]));
             }
             // Get the employee using the person from this user.
-            $person = $user['person'];
-            // todo...
-
-            $studentUpdate['mentor'] = ""; // todo: The employee uuid of the owner
+            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $user['person']])['results']; // add to query?: 'person.user.username' => $existingUser['username'] OR: 'person.emails.email' => $existingUser['username']
+            var_dump(count($existingEmployees));
+            if (count($existingEmployees) > 0) {
+                $employee = $existingEmployees[0];
+                $studentUpdate['mentor'] = $employee['id'];
+            }
         }
 
         return $studentUpdate;
