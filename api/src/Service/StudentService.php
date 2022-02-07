@@ -77,6 +77,7 @@ class StudentService
      */
     private function checkIntakeStatus(array $student, array $studentUpdate): array
     {
+        // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
         if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake'])) {
             $studentUpdate['intake'] = [
                 'status' => 'ACCEPTED',
