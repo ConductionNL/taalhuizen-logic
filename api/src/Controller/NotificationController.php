@@ -150,7 +150,7 @@ class NotificationController extends AbstractController
         $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
         // Check if we need to find a LanguageHouse with the students address
         $studentService = new StudentService($commonGroundService);
-        $student = $studentService->checkStudent($student);
+        $student = $studentService->checkStudent($student); // never use this for action == Update, this would break stuff
 
         $result = [
             'studentUri'            => $data['resource'],
