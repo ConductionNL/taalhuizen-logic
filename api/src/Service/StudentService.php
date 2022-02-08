@@ -16,17 +16,21 @@ class StudentService
     }
 
     /**
-     * Sets the correct values for the student in the gateway
+     * Sets the correct values for the student in the gateway when a new student object is created
      *
      * @param array $student
      * @return array
      */
     public function checkStudent(array $student): array
     {
-        $studentUpdate = $this->checkLanguageHouse($student);
-        $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
+        if ($student['@organization'] !== $student['languageHouse']['@uri']
+            || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
+            $studentUpdate = $this->checkLanguageHouse($student);
+            $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
+            $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate);
 
-        if ($student['@organization'] !== $student['languageHouse']['@uri'] || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
+            $studentUpdate['person'] = $student['person']['id'];
+
             $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
 
@@ -62,7 +66,6 @@ class StudentService
         else {
 //            var_dump('org '.$student['languageHouse']['@uri']);
             $studentUpdate['@organization'] = $student['languageHouse']['@uri'];
-            $studentUpdate['person'] = $student['person']['id'];
 //            $studentUpdate['languageHouse'] = $student['languageHouse']['id']; // This attribute is immutable
         }
 
@@ -73,11 +76,13 @@ class StudentService
      * Returns a student body with the correct intake status for updating the student in the gateway
      *
      * @param array $student
+     * @param array $studentUpdate
      * @return array
      */
     private function checkIntakeStatus(array $student, array $studentUpdate): array
     {
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
+        // If manual registration, set intake status to accepted
         if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake'])) {
             $studentUpdate['intake'] = [
                 'status' => 'ACCEPTED',
@@ -86,6 +91,36 @@ class StudentService
                 'hasPermissionToShareDataWithLibraries' => $student['intake']['hasPermissionToShareDataWithLibraries'],
                 'hasPermissionToSendInformationAboutLibraries' => $student['intake']['hasPermissionToSendInformationAboutLibraries']
             ];
+        }
+
+        return $studentUpdate;
+    }
+
+    /**
+     * Returns a student body with the correct mentor employee for updating the student in the gateway
+     *
+     * @param array $student
+     * @param array $studentUpdate
+     * @return array
+     */
+    private function checkMentorAndTeam(array $student, array $studentUpdate): array
+    {
+        // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
+        // If manual registration, set mentor to the employee who did the registration
+        if (!empty($student['@owner'])) {
+            // Find the user that created this student resource (check for $student['@owner'] = url or, else $student['@owner'] = uuid)
+            if (!$user = $this->commonGroundService->isResource($student['@owner'])) {
+                $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]));
+            }
+            // Get the employee using the person from this user.
+            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $user['person']])['results'];
+            if (count($existingEmployees) > 0) {
+                $employee = $existingEmployees[0];
+                $studentUpdate['mentor'] = $employee['id'];
+                if (!empty($employee['teams'])) {
+                    $studentUpdate['team'] = $employee['teams'][0]['id'];
+                }
+            }
         }
 
         return $studentUpdate;
