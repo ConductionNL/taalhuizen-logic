@@ -16,7 +16,7 @@ class StudentService
     }
 
     /**
-     * Sets the correct values for the student in the gateway
+     * Sets the correct values for the student in the gateway when a new student object is created
      *
      * @param array $student
      * @return array
@@ -27,7 +27,7 @@ class StudentService
             || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
             $studentUpdate = $this->checkLanguageHouse($student);
             $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
-            $studentUpdate = $this->checkMentor($student, $studentUpdate);
+            $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate);
 
             $studentUpdate['person'] = $student['person']['id'];
 
@@ -103,7 +103,7 @@ class StudentService
      * @param array $studentUpdate
      * @return array
      */
-    private function checkMentor(array $student, array $studentUpdate): array
+    private function checkMentorAndTeam(array $student, array $studentUpdate): array
     {
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
         // If manual registration, set mentor to the employee who did the registration
@@ -113,11 +113,13 @@ class StudentService
                 $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]));
             }
             // Get the employee using the person from this user.
-            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $user['person']])['results']; // add to query?: 'person.user.username' => $existingUser['username'] OR: 'person.emails.email' => $existingUser['username']
-            var_dump(count($existingEmployees));
+            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $user['person']])['results'];
             if (count($existingEmployees) > 0) {
                 $employee = $existingEmployees[0];
                 $studentUpdate['mentor'] = $employee['id'];
+                if (!empty($employee['teams'])) {
+                    $studentUpdate['team'] = $employee['teams'][0]['id'];
+                }
             }
         }
 
