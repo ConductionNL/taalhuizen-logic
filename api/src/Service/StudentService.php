@@ -45,6 +45,7 @@ class StudentService
      */
     private function checkLanguageHouse(array $student): array
     {
+        $studentUpdate = [];
         // If this student has no LanguageHouse
         if (!array_key_exists('@uri', $student['languageHouse'])) {
             // todo: this is disabled for now
