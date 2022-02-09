@@ -27,7 +27,8 @@ class OrganizationService
         $team = [
             "name" => "Team ".$organization['name'],
             "type" => "team",
-            "parentOrganization" => $organization['id']
+            "parentOrganization" => $organization['id'],
+            "@organization" => $organization['@uri']
         ];
 
         return $this->commonGroundService->createResource($team, ['component' => 'gateway', 'type' => 'organizations']);
