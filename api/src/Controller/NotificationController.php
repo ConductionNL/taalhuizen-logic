@@ -145,6 +145,7 @@ class NotificationController extends AbstractController
         if ($data['action'] !== 'Create') {
             return new Response(json_encode(['studentUri' => $data['resource']]), 200, ['Content-type' => 'application/json']);
         }
+        sleep(10);
 
         // Retrieve student object from gateway
         $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
