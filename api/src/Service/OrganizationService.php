@@ -18,7 +18,7 @@ class OrganizationService
     /**
      * Creates a team for an languageHouse organization.
      *
-     * @param array  $organization The organization to save a team for
+     * @param array  $organization The ContactCatalogus organization to save a team for
      *
      * @return array The created Team
      */
@@ -28,7 +28,7 @@ class OrganizationService
             "name" => "Team ".$organization['name'],
             "type" => "team",
             "parentOrganization" => $organization['id'],
-            "@organization" => $organization['@uri']
+            "@organization" => $organization['@id']
         ];
 
         return $this->commonGroundService->createResource($team, ['component' => 'gateway', 'type' => 'organizations']);
