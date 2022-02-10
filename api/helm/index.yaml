@@ -5,13 +5,12 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 11.13.0
-    created: "2022-01-12T08:26:51.3448111Z"
+    created: "2022-02-10T09:25:44.2780762+01:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
       version: 1.x.x
-    description: Chart for PostgreSQL, an object-relational database management system
-      (ORDBMS) with an emphasis on extensibility and on standards-compliance.
+    description: Chart for PostgreSQL, an object-relational database management system (ORDBMS) with an emphasis on extensibility and on standards-compliance.
     digest: 1b7c4bfba1e8257793e8d6690e02b86c0bdac99922e1fa74b6a7df9d800938ab
     home: https://github.com/bitnami/charts/tree/master/bitnami/postgresql
     icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
@@ -39,16 +38,14 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 6.2.5
-    created: "2022-01-12T08:26:51.3583185Z"
+    created: "2022-02-10T09:25:44.2825764+01:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
       tags:
       - bitnami-common
       version: 1.x.x
-    description: Open source, advanced key-value store. It is often referred to as
-      a data structure server since keys can contain strings, hashes, lists, sets
-      and sorted sets.
+    description: Open source, advanced key-value store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets and sorted sets.
     digest: f8fa3b0bdaecf7f9aa1669b027c5452f7efaab21c10b0dbcf7148e17c54ac5b7
     home: https://github.com/bitnami/charts/tree/master/bitnami/redis
     icon: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
@@ -73,7 +70,7 @@ entries:
       artifacthub.io/containsSecurityUpdates: "true"
     apiVersion: v2
     appVersion: V1.0
-    created: "2022-01-12T08:26:51.3312642Z"
+    created: "2022-02-10T09:25:44.2745761+01:00"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -83,9 +80,8 @@ entries:
       name: redis
       repository: https://charts.bitnami.com/bitnami
       version: 12.7.7
-    description: Het Proto Component vormt zowel de gemeenschappelijke basis onder
-      alle componenten, als een “template” voor het maken van nieuwe componenten.
-    digest: baef78c192050970134c6d466199bebce2d7e8695bf656fc8dff755a93e70694
+    description: Het Proto Component vormt zowel de gemeenschappelijke basis onder alle componenten, als een “template” voor het maken van nieuwe componenten.
+    digest: 5ab1eb33c2dcaf1553b024e0081da4924d531f615298c9741a8d315f29bd6b7d
     home: https://www.conduction.nl
     icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
     keywords:
@@ -105,4 +101,4 @@ entries:
     urls:
     - taalhuizen-logic-1.0.0.tgz
     version: 1.0.0
-generated: "2022-01-12T08:26:51.3079534Z"
+generated: "2022-02-10T09:25:44.2320777+01:00"
