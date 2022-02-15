@@ -247,7 +247,7 @@ class UserService
      */
     private function getScopes(string $userGroupId): array
     {
-        $scopes = $this->commonGroundService->getResource(['component' => 'uc', 'type' => 'groups', 'id' => $userGroupId])['scopes'];
+        $scopes = $this->commonGroundService->getResource(['component' => 'uc', 'type' => 'groups', 'id' => $userGroupId], [], false)['scopes'];
         foreach ($scopes as &$scope) {
             $scope = '/scopes/'.$scope['id'];
         }
@@ -434,7 +434,7 @@ class UserService
      */
     private function getAllUserGroupsOfType (string $code): array
     {
-        return $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['name' => $code, 'limit' => 1000])['hydra:member'];
+        return $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['name' => $code, 'limit' => 1000], false)['hydra:member'];
     }
 
     /**
