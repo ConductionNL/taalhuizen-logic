@@ -146,7 +146,7 @@ class NotificationController extends AbstractController
         if ($data['action'] === 'Create' || $data['action'] === 'Update') {
             // Retrieve student object from gateway
             $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
-            $studentService = new StudentService($commonGroundService);
+            $studentService = new StudentService($commonGroundService, $parameterBag);
 
             if ($data['action'] === 'Create') {
                 // Check if we need to change @organization, intake.status or mentor & team

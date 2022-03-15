@@ -5,14 +5,17 @@ namespace App\Service;
 
 
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class StudentService
 {
     private CommonGroundService $commonGroundService;
+    private ParameterBagInterface $parameterBag;
 
-    public function __construct(CommonGroundService $commonGroundService)
+    public function __construct(CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag)
     {
         $this->commonGroundService = $commonGroundService;
+        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -32,9 +35,17 @@ class StudentService
             $studentUpdate['person'] = $student['person']['id'];
             $studentUpdate['@owner'] = null; // Make sure we do not set the owner to the Taalhuizen-logic user.
 
-            $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
+            $component = $this->parameterBag->get('components')['gateway'];
+            $url = $component['location'].'/students/'.$student['id'];
+            $content = json_encode($studentUpdate);
+            $response = $this->commonGroundService->callService($component, $url, $content, [], [], false, 'PUT');
+            // Callservice returns array on error
+            if (is_array($response)) {
+                //todo?
+//                var_dump($response);
+            }
+            $student = json_decode($response->getBody()->getContents(), true);
         }
-
         return $student;
     }
 
