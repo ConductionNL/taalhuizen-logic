@@ -5,14 +5,17 @@ namespace App\Service;
 
 
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class StudentService
 {
     private CommonGroundService $commonGroundService;
+    private ParameterBagInterface $parameterBag;
 
-    public function __construct(CommonGroundService $commonGroundService)
+    public function __construct(CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag)
     {
         $this->commonGroundService = $commonGroundService;
+        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -24,16 +27,25 @@ class StudentService
     public function checkStudent(array $student): array
     {
         if ($student['@organization'] !== $student['languageHouse']['@uri']
-            || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake'] !== 'ACCEPTED')) {
+            || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED')) {
             $studentUpdate = $this->checkLanguageHouse($student);
             $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
             $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate);
 
             $studentUpdate['person'] = $student['person']['id'];
+            $studentUpdate['@owner'] = null; // Make sure we do not set the owner to the Taalhuizen-logic user.
 
-            $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
+            $component = $this->parameterBag->get('components')['gateway'];
+            $url = $component['location'].'/students/'.$student['id'];
+            $content = json_encode($studentUpdate);
+            $response = $this->commonGroundService->callService($component, $url, $content, [], [], false, 'PUT');
+            // Callservice returns array on error
+            if (is_array($response)) {
+                //todo?
+//                var_dump($response);
+            }
+            $student = json_decode($response->getBody()->getContents(), true);
         }
-
         return $student;
     }
 
@@ -84,7 +96,7 @@ class StudentService
     {
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
         // If manual registration, set intake status to accepted
-        if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake'])) {
+        if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED') {
             $studentUpdate['intake'] = [
                 'status' => 'ACCEPTED',
                 'didSignPermissionForm' => $student['intake']['didSignPermissionForm'],
@@ -118,12 +130,34 @@ class StudentService
             if (count($existingEmployees) > 0) {
                 $employee = $existingEmployees[0];
                 $studentUpdate['mentor'] = $employee['id'];
-                if (!empty($employee['teams'])) {
+                if (!empty($employee['teams']) && empty($student['team'])) {
                     $studentUpdate['team'] = $employee['teams'][0]['id'];
                 }
             }
         }
 
         return $studentUpdate;
+    }
+
+    /**
+     * Sets the correct values for the student in the gateway when a public registration is accepted
+     *
+     * @param array $student
+     * @return array
+     */
+    public function acceptedRegistration(array $student): array
+    {
+        // If no mentor is set for this student, we have an owner to get the mentor employee with and the status of this student is ACCEPTED...
+        if (empty($student['mentor']) && !empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake']['status'] === 'ACCEPTED') {
+            // Set the mentor for this student (without changing the team if the student already has a team)
+            $studentUpdate = $this->checkLanguageHouse($student);
+            $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate); // todo: owner is not set to the user that accepted the registration... so this does not work at the moment
+
+            $studentUpdate['person'] = $student['person']['id'];
+
+            $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
+        }
+
+        return $student;
     }
 }

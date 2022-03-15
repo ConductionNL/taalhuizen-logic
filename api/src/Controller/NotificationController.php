@@ -142,15 +142,20 @@ class NotificationController extends AbstractController
     public function createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $data = json_decode($request->getContent(), true);
-        if ($data['action'] !== 'Create') {
-            return new Response(json_encode(['studentUri' => $data['resource']]), 200, ['Content-type' => 'application/json']);
-        }
 
-        // Retrieve student object from gateway
-        $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
-        // Check if we need to find a LanguageHouse with the students address
-        $studentService = new StudentService($commonGroundService);
-        $student = $studentService->checkStudent($student); // never use this for action == Update, this would break stuff
+        if ($data['action'] === 'Create' || $data['action'] === 'Update') {
+            // Retrieve student object from gateway
+            $student = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'students', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            $studentService = new StudentService($commonGroundService, $parameterBag);
+
+            if ($data['action'] === 'Create') {
+                // Check if we need to change @organization, intake.status or mentor & team
+                $student = $studentService->checkStudent($student); // never use this for action == Update, this would break stuff
+            } else {
+                // Check if registration got accepted and no student.mentor is set yet.
+                $student = $studentService->acceptedRegistration($student);
+            }
+        }
 
         $result = [
             'studentUri'            => $data['resource'],
