@@ -30,6 +30,7 @@ class StudentService
             $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate);
 
             $studentUpdate['person'] = $student['person']['id'];
+            $studentUpdate['@owner'] = null; // Make sure we do not set the owner to the Taalhuizen-logic user.
 
             $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
@@ -142,8 +143,6 @@ class StudentService
             $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate); // todo: owner is not set to the user that accepted the registration... so this does not work at the moment
 
             $studentUpdate['person'] = $student['person']['id'];
-
-            var_dump($studentUpdate);
 
             $student = $this->commonGroundService->updateResource($studentUpdate, ['component' => 'gateway', 'type' => 'students', 'id' => $student['id']]);
         }
