@@ -27,17 +27,20 @@ class StudentService
     public function checkStudent(array $student): array
     {
         if ($student['@organization'] !== $student['languageHouse']['@uri']
-            || (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED')) {
+            || (!empty($student['@owner']) && (empty($student['intake']) || (array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED')))) {
             $studentUpdate = $this->checkLanguageHouse($student);
             $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
             $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate);
 
             $studentUpdate['person'] = $student['person']['id'];
-            $studentUpdate['@owner'] = null; // Make sure we do not set the owner to the Taalhuizen-logic user.
+            if (empty($student['@owner'])) {
+                $studentUpdate['@owner'] = null; // Make sure we do not set the owner to the Taalhuizen-logic user for a public registration on creation.
+            }
 
             $component = $this->parameterBag->get('components')['gateway'];
             $url = $component['location'].'/students/'.$student['id'];
             $content = json_encode($studentUpdate);
+            // @owner will be removed from the body if we use cgb updateResource instead of callservice...
             $response = $this->commonGroundService->callService($component, $url, $content, [], [], false, 'PUT');
             // Callservice returns array on error
             if (is_array($response)) {
@@ -96,13 +99,13 @@ class StudentService
     {
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
         // If manual registration, set intake status to accepted
-        if (!empty($student['@owner']) && array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED') {
+        if (!empty($student['@owner']) && (empty($student['intake']) || (array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED'))) {
             $studentUpdate['intake'] = [
                 'status' => 'ACCEPTED',
-                'didSignPermissionForm' => $student['intake']['didSignPermissionForm'],
-                'hasPermissionToShareDataWithProviders' => $student['intake']['hasPermissionToShareDataWithProviders'],
-                'hasPermissionToShareDataWithLibraries' => $student['intake']['hasPermissionToShareDataWithLibraries'],
-                'hasPermissionToSendInformationAboutLibraries' => $student['intake']['hasPermissionToSendInformationAboutLibraries']
+                'didSignPermissionForm' => $student['intake']['didSignPermissionForm'] ?? false,
+                'hasPermissionToShareDataWithProviders' => $student['intake']['hasPermissionToShareDataWithProviders'] ?? false,
+                'hasPermissionToShareDataWithLibraries' => $student['intake']['hasPermissionToShareDataWithLibraries'] ?? false,
+                'hasPermissionToSendInformationAboutLibraries' => $student['intake']['hasPermissionToSendInformationAboutLibraries'] ?? false
             ];
         }
 
@@ -123,10 +126,10 @@ class StudentService
         if (!empty($student['@owner'])) {
             // Find the user that created this student resource (check for $student['@owner'] = url or, else $student['@owner'] = uuid)
             if (!$user = $this->commonGroundService->isResource($student['@owner'])) {
-                $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]));
+                $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]), [], false);
             }
             // Get the employee using the person from this user.
-            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $user['person']])['results'];
+            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $user['person']], false)['results'];
             if (count($existingEmployees) > 0) {
                 $employee = $existingEmployees[0];
                 $studentUpdate['mentor'] = $employee['id'];
