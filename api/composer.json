@@ -35,6 +35,7 @@
         "symfony/validator": "^5.1",
         "symfony/yaml": "^5.1",
         "tbbc/money-bundle": "^4.0",
+        "twig/twig": "3.3.8",
         "webonyx/graphql-php": "^0.13.8"
     },
     "require-dev" : {
