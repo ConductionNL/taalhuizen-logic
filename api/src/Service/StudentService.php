@@ -26,8 +26,16 @@ class StudentService
      */
     public function checkStudent(array $student): array
     {
-        if ($student['@organization'] !== $student['languageHouse']['@uri']
-            || (!empty($student['@owner']) && (empty($student['intake']) || (array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED')))) {
+        if ($student['@organization'] !== $student['languageHouse']['@uri'] ||
+            (
+                !empty($student['@owner']) &&
+                (
+                    empty($student['mentor']) ||
+                    empty($student['intake']) ||
+                    (array_key_exists('@uri', $student['intake']) && $student['intake']['status'] !== 'ACCEPTED')
+                )
+            )
+        ) {
             $studentUpdate = $this->checkLanguageHouse($student);
             $studentUpdate = $this->checkIntakeStatus($student, $studentUpdate); //todo array merge?
             $studentUpdate = $this->checkMentorAndTeam($student, $studentUpdate);
@@ -79,7 +87,7 @@ class StudentService
         }
         // If this student does have a LanguageHouse & intake status == PENDING (public registration Release 3 Scenario 5.0)
 //        elseif (array_key_exists('intake', $student) && array_key_exists('status', $student['intake']) && $student['intake']['status'] == 'PENDING') {
-        else {
+        elseif ($student['@organization'] !== $student['languageHouse']['@uri']) {
 //            var_dump('org '.$student['languageHouse']['@uri']);
             $studentUpdate['@organization'] = $student['languageHouse']['@uri'];
 //            $studentUpdate['languageHouse'] = $student['languageHouse']['id']; // This attribute is immutable
@@ -123,7 +131,7 @@ class StudentService
     {
         // Note: A public registration is done anonymous and has no @owner. A manual registration has an @owner.
         // If manual registration, set mentor to the employee who did the registration
-        if (!empty($student['@owner'])) {
+        if (!empty($student['@owner']) && empty($student['mentor'])) {
             // Find the user that created this student resource (check for $student['@owner'] = url or, else $student['@owner'] = uuid)
             if (!$user = $this->commonGroundService->isResource($student['@owner'])) {
                 $user = $this->commonGroundService->getResource($this->commonGroundService->cleanUrl(['component' => 'uc', 'type' => 'users', 'id' => $student['@owner']]), [], false);
