@@ -42,7 +42,8 @@ class ParticipationService
     {
         $totalStudentParticipations = $this->commonGroundService->getResourceList(
             ['component' => 'gateway', 'type' => 'participations'],
-            ['learningNeed.student.id' => $participation['learningNeed']['student']['id'], 'fields[]' => null]
+            ['learningNeed.student.id' => $participation['learningNeed']['student']['id'], 'fields[]' => null],
+            false
         )['total'];
 
         if ($totalStudentParticipations == 1) {
