@@ -34,4 +34,14 @@ class ParticipationService
         }
         return [];
     }
+
+    public function checkStudentReferred(array $participation): array
+    {
+        // todo: check if this is the first participation (verwijzing) for the student, if so set student.referred to dateCreated of the participation
+        // todo: GET /participations?learningNeed.student.id={uuid}
+        // todo: ^ fields[] = null
+        // todo: total of count() gebruiken
+
+        return [];
+    }
 }
