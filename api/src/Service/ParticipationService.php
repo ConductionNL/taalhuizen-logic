@@ -30,8 +30,32 @@ class ParticipationService
             $participationUpdate['status'] = "ACTIVE";
             $participationUpdate['learningNeed'] = $participation['learningNeed']['id'];
             $participationUpdate['providerOption'] = $participation['providerOption'];
-            return $this->commonGroundService->updateResource($participationUpdate, ['component' => 'gateway', 'type' => 'participations', 'id' => $participation['id']]);
+            return $this->commonGroundService->updateResource($participationUpdate,
+                ['component' => 'gateway', 'type' => 'participations', 'id' => $participation['id']]
+            );
         }
+
+        return $participation;
+    }
+
+    public function checkStudentReferred(array $participation): array
+    {
+        $totalStudentParticipations = $this->commonGroundService->getResourceList(
+            ['component' => 'gateway', 'type' => 'participations'],
+            ['learningNeed.student.id' => $participation['learningNeed']['student']['id'], 'fields[]' => null]
+        )['total'];
+
+        if ($totalStudentParticipations == 1) {
+            $studentUpdate = [
+                'person'    => $this->commonGroundService->getUuidFromUrl($participation['learningNeed']['student']['person']['@id']), // we don't have 'id' here, maxDepth...
+                'referred'  => $participation['@dateCreated']
+            ];
+
+            return $this->commonGroundService->updateResource($studentUpdate,
+                ['component' => 'gateway', 'type' => 'students', 'id' => $participation['learningNeed']['student']['id']]
+            );
+        }
+
         return [];
     }
 }

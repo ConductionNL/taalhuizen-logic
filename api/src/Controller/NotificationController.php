@@ -181,11 +181,16 @@ class NotificationController extends AbstractController
 
             // Set status
             $participation = $participationService->setStatus($participation);
+
+            if ($data['action'] === 'Create') {
+                $student = $participationService->checkStudentReferred($participation);
+            }
         }
 
         $result = [
             'participationUri'            => $data['resource'],
-            'GatewayParticipationObject'  => $participation ?? null
+            'GatewayParticipationObject'  => $participation ?? null,
+            'GatewayStudentObject'        => $student ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
