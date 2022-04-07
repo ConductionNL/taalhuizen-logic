@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Service\MailService;
 use App\Service\EmployeeService;
 use App\Service\OrganizationService;
+use App\Service\ParticipationService;
 use App\Service\StudentService;
 use App\Service\UserService;
 use Conduction\CommonGroundBundle\Service\CommonGroundService;
@@ -139,7 +140,7 @@ class NotificationController extends AbstractController
     /**
      * @Route ("/students", methods={"POST"})
      */
-    public function createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag, Environment $twig)
+    public function createOrEditStudentAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag)
     {
         $data = json_decode($request->getContent(), true);
 
@@ -160,6 +161,31 @@ class NotificationController extends AbstractController
         $result = [
             'studentUri'            => $data['resource'],
             'GatewayStudentObject'  => $student ?? null
+        ];
+
+        return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
+    }
+
+    /**
+     * @Route ("/participations", methods={"POST"})
+     */
+    public function createOrEditParticipationAction(Request $request, CommonGroundService $commonGroundService, ParameterBagInterface $parameterBag)
+    {
+        // TODO: Participation = verwijzing van een leervraag
+        $data = json_decode($request->getContent(), true);
+
+        if ($data['action'] === 'Create' || $data['action'] === 'Update') {
+            // Retrieve participation object from gateway
+            $participation = $this->commonGroundService->getResource(['component' => 'gateway', 'type' => 'participations', 'id' => $commonGroundService->getUuidFromUrl($data['resource'])], [], false);
+            $participationService = new ParticipationService($commonGroundService, $parameterBag);
+
+            // Set status
+            $participation = $participationService->setStatus($participation);
+        }
+
+        $result = [
+            'participationUri'            => $data['resource'],
+            'GatewayParticipationObject'  => $participation ?? null
         ];
 
         return new Response(json_encode($result), 200, ['Content-type' => 'application/json']);
