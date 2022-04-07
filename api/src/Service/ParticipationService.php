@@ -35,7 +35,7 @@ class ParticipationService
             );
         }
 
-        return [];
+        return $participation;
     }
 
     public function checkStudentReferred(array $participation): array
@@ -45,7 +45,7 @@ class ParticipationService
             ['learningNeed.student.id' => $participation['learningNeed']['student']['id'], 'fields[]' => null]
         )['total'];
 
-        if ($totalStudentParticipations == 0) {
+        if ($totalStudentParticipations == 1) {
             $studentUpdate = [
                 'person'    => $this->commonGroundService->getUuidFromUrl($participation['learningNeed']['student']['person']['@id']), // we don't have 'id' here, maxDepth...
                 'referred'  => $participation['@dateCreated']
