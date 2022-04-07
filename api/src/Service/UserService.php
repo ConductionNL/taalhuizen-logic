@@ -98,7 +98,7 @@ class UserService
         if (count($existingUsers) > 0) {
             $existingUser = $existingUsers[0];
             //If a user exists with the email, check if an employee already exists with this user.
-            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $existingUser['person']])['results']; // add to query?: 'person.user.username' => $existingUser['username'] OR: 'person.emails.email' => $existingUser['username']
+            $existingEmployees = $this->commonGroundService->getResourceList(['component' => 'gateway', 'type' => 'employees'], ['person._uri' => $existingUser['person']], false)['results']; // add to query?: 'person.user.username' => $existingUser['username'] OR: 'person.emails.email' => $existingUser['username']
             if (count($existingEmployees) > 0) {
                 //If an employee exists with this user, delete new employee and send email to the existing user.
                 $this->commonGroundService->deleteResource(null, ['component' => 'gateway', 'type' => 'employees', 'id' => $employee['id']]);
@@ -211,7 +211,7 @@ class UserService
      */
     public function deleteUserGroups(string $organization)
     {
-        $userGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $organization])['hydra:member'];
+        $userGroups = $this->commonGroundService->getResourceList(['component' => 'uc', 'type' => 'groups'], ['organization' => $organization], false)['hydra:member'];
         if ($userGroups > 0) {
             foreach ($userGroups as $userGroup) {
                 $this->commonGroundService->deleteResource(null, ['component'=>'uc', 'type' => 'groups', 'id' => $userGroup['id']]);
