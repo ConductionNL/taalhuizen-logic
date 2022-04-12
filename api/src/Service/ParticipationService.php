@@ -73,7 +73,7 @@ class ParticipationService
     }
 
     /**
-     * @TODO
+     * Function for cron-job that checks if participation status need to be set to COMPLETED.
      *
      * @return array
      */
@@ -91,22 +91,30 @@ class ParticipationService
             ],
             false
         )['results'];
-//        var_dump(count($participations));
 
-//        foreach ($participations as $participation) {
-//            $participationUpdate = [
-//                'status'            => "COMPLETED",
-//                'learningNeed'      => $participation['learningNeed']['id'],
-//                'providerOption'    => $participation['providerOption']
-//            ];
-//            $result[] = $this->commonGroundService->updateResource($participationUpdate,
-//                ['component' => 'gateway', 'type' => 'participations', 'id' => $participation['id']]
-//            )['@uri'];
-//        }
+        foreach ($participations as $participation) {
+            $participationUpdate = [
+                'status'            => "COMPLETED",
+                'learningNeed'      => $participation['learningNeed']['id'],
+                'providerOption'    => $participation['providerOption']
+            ];
+            $result[] = $this->commonGroundService->updateResource($participationUpdate,
+                ['component' => 'gateway', 'type' => 'participations', 'id' => $participation['id']]
+            )['@uri'];
+        }
 
-        return $participations;
+        return $result;
     }
 
+    /**
+     * Function for ValuesCommand (see /api/src/Command/ValuesCommand.php)
+     *
+     * @param SymfonyStyle $io
+     * @param $page
+     * @param int $errorCount
+     * @param bool $first
+     * @return float|int
+     */
     public function updateGatewayDateTimeValues(SymfonyStyle $io, $page = 1, int $errorCount = 0, bool $first = true)
     {
         $values = $this->commonGroundService->getResourceList(
