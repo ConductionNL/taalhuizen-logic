@@ -5,7 +5,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 11.13.0
-    created: "2022-02-11T09:33:28.3859632+01:00"
+    created: "2022-04-14T16:26:11.0492985+02:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -38,7 +38,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 6.2.5
-    created: "2022-02-11T09:33:28.3897905+01:00"
+    created: "2022-04-14T16:26:11.0533084+02:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -70,7 +70,7 @@ entries:
       artifacthub.io/containsSecurityUpdates: "true"
     apiVersion: v2
     appVersion: V1.0
-    created: "2022-02-11T09:33:28.3822909+01:00"
+    created: "2022-04-14T16:26:11.0452985+02:00"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -81,7 +81,7 @@ entries:
       repository: https://charts.bitnami.com/bitnami
       version: 12.7.7
     description: Het Proto Component vormt zowel de gemeenschappelijke basis onder alle componenten, als een “template” voor het maken van nieuwe componenten.
-    digest: 4f7a039442eb570a25739d2b9a177fdaa040a05cee8e91d8e4105f5dd43556c8
+    digest: 02f50ef7e8d6a22775dbe166bc2e86bff2eefd622d54d6678f527dd8f23720fb
     home: https://www.conduction.nl
     icon: https://conductionnl.github.io/images/conduction_avatar_blue_on_transparant.svg
     keywords:
@@ -101,4 +101,4 @@ entries:
     urls:
     - taalhuizen-logic-1.0.0.tgz
     version: 1.0.0
-generated: "2022-02-11T09:33:28.3392898+01:00"
+generated: "2022-04-14T16:26:11.034288+02:00"
