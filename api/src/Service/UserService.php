@@ -480,6 +480,7 @@ class UserService
 
         $io->progressStart(count($userGroups));
         foreach($userGroups as $userGroup){
+            $io->text("");
             $io->section("Checking userGroup {$userGroup['id']}");
             $currentScopes = $this->getAllScopeIdsForUserGroup($userGroup);
             switch($directive)

@@ -73,49 +73,74 @@ class ParticipationService
     }
 
     /**
-     * Function for cron-job that checks if participation status need to be set to COMPLETED.
+     * Function for cron-job that checks if participation status need to be set to COMPLETED. (see /api/src/Command/ParticipationSatusCommand.php & /api/helm/templates/cron-participation-status.yaml)
      *
-     * @return array
+     * @param SymfonyStyle $io
+     * @param int $page
+     * @param int $errorCount
+     * @param bool $first
+     * @return float|int
      */
-    public function updateCompletedParticipations(): array
+    public function updateCompletedParticipations(SymfonyStyle $io, int $page = 1, int $errorCount = 0, bool $first = true)
     {
-        $result = [];
         $today = new DateTime();
         $today = $today->format('Y-m-d');
         $participations = $this->commonGroundService->getResourceList(
             ['component' => 'gateway', 'type' => 'participations'],
             [
+                'page' => $page,
                 'end[before]' => $today,
                 'status' => 'ACTIVE',
-                'fields' => ['status', 'learningNeed.id', 'providerOption']
+                'fields' => ['status', 'learningNeed.id', 'providerOption', 'end']
             ],
             false
-        )['results'];
-
-        foreach ($participations as $participation) {
-            $participationUpdate = [
-                'status'            => "COMPLETED",
-                'learningNeed'      => $participation['learningNeed']['id'],
-                'providerOption'    => $participation['providerOption']
-            ];
-            $result[] = $this->commonGroundService->updateResource($participationUpdate,
-                ['component' => 'gateway', 'type' => 'participations', 'id' => $participation['id']]
-            )['@uri'];
+        );
+        if ($first) {
+            $io->text('Found '.$participations['total'].' participations');
+            $io->progressStart($participations['total']);
         }
 
-        return $result;
+        foreach ($participations['results'] as $participation) {
+            $io->text("");
+            $io->section("Updating participation {$participation['id']}");
+            try {
+                $participationUpdate = [
+                    'status'            => "COMPLETED",
+                    'learningNeed'      => $participation['learningNeed']['id'],
+                    'providerOption'    => $participation['providerOption']
+                ];
+                $this->commonGroundService->updateResource($participationUpdate,
+                    ['component' => 'gateway', 'type' => 'participations', 'id' => $participation['id']]
+                );
+                $io->text('Participation with end: '.$participation['end'].' now has status COMPLETED');
+            } catch (RequestException $exception) {
+                $io->error($exception->getMessage());
+                $errorCount++;
+            }
+            $io->progressAdvance();
+        }
+
+        if ($participations['page'] !== $participations['pages']) {
+            return $this->updateCompletedParticipations($io, $page + 1, $errorCount, false);
+        }
+
+        $io->progressFinish();
+        if ($participations['total'] == 0) {
+            return 0;
+        }
+        return round($errorCount/$participations['total']*100) == 0 && $errorCount > 0 ? 1 : round($errorCount/$participations['total']*100);
     }
 
     /**
      * Function for ValuesCommand (see /api/src/Command/ValuesCommand.php)
      *
      * @param SymfonyStyle $io
-     * @param $page
+     * @param int $page
      * @param int $errorCount
      * @param bool $first
      * @return float|int
      */
-    public function updateGatewayDateTimeValues(SymfonyStyle $io, $page = 1, int $errorCount = 0, bool $first = true)
+    public function updateGatewayDateTimeValues(SymfonyStyle $io, int $page = 1, int $errorCount = 0, bool $first = true)
     {
         $values = $this->commonGroundService->getResourceList(
             ['component' => 'gatewayAdmin', 'type' => 'values'],
@@ -123,11 +148,13 @@ class ParticipationService
             false
         );
         if ($first) {
+            $io->text('Found '.$values['hydra:totalItems'].' values');
             $io->progressStart($values['hydra:totalItems']);
         }
 
         foreach ($values['hydra:member'] as $value) {
-            $io->section("Checking value {$value['id']}");
+            $io->text("");
+            $io->section("Updating value {$value['id']}");
             try {
                 $date = new DateTime($value['dateTimeValue']);
                 $date = $date->format('Y-m-d H:i:s');
