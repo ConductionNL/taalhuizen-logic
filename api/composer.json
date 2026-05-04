@@ -36,7 +36,7 @@
         "symfony/yaml": "^5.1",
         "tbbc/money-bundle": "^4.0",
         "twig/twig": "3.3.8",
-        "webonyx/graphql-php": "^0.13.8"
+        "webonyx/graphql-php": "^15.32.2"
     },
     "require-dev" : {
         "api-platform/schema-generator": "^2.1",
